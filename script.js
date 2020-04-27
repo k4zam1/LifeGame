@@ -1,36 +1,3 @@
-
-var canvas = document.getElementById("canvas");
-var context = canvas.getContext("2d");
-
-/* イベントの登録 */
-function onDown(e){
-    //console.log("down");
-}
-  
-function onUp(e){
-    //console.log("up");
-}
-
-function onClick(e){
-    //console.log("click");
-}
-
-function onOver(e) {
-    //console.log("mouseover");
-}
-
-function onOut(){
-    //console.log("mouseout");
-}
-
-function eventRegister(){
-    canvas.addEventListener('mousedown', onDown, false);
-    canvas.addEventListener('mouseup', onUp, false);
-    canvas.addEventListener('click', onClick, false);
-    canvas.addEventListener('mouseover', onOver, false);
-    canvas.addEventListener('mouseout', onOut, false);
-}
-
 function main(){
     // initialize
     canvas.height = 480;
@@ -48,21 +15,11 @@ function main(){
     },1000);
 }
 
-
-class Point {
-    constructor(x,y){
-        this.x = x;
-        this.y = y;
-    }
-}
-
 // draw test
-var f1 = new Point(5,5);
-var f2 = new Point(24,60);
+var adam_genes = [0,2,3,5,6,8,1,0];
+var adam = new Animal(50,50,80,0,adam_genes);
+animals.push(adam);
 
-var foods = [f1,f2];
-var animals = [];
-var biome = [];
 var day = 0;
 
 function gameRoutine(){
@@ -71,13 +28,61 @@ function gameRoutine(){
 
     // update world
     ++day;
+    add_plant();
+
+    // animals_update
+    var new_animals = []
+    for(animal of animals){
+        if(animal.energy > 0){
+            new_animals.push(animal);
+        }
+    }
+    animals = Object.create(new_animals);
+    var childs = [];
+    for(animal of animals){
+        animal.turn();
+        animal.move();
+        //animal.eat();
+        if(day%3 == 0){
+            var child = animal.reproduce();
+            childs.push(child);
+        }
+    }
+    for(child of childs){
+        animals.push(child);
+    }
+    
     context.fillStyle = "rgb(0,200,0)";
-    for(food of foods){
-        context.fillRect(food.x-2,food.y-3,5,5);
+    for(plant of plants){
+        context.fillRect(plant.x-2,plant.y-3,5,5);
+    }
+    context.fillStyle = "rgb(200,0,0)";
+    for(animal of animals){
+        context.fillRect(animal.x-2,animal.y-3,5,5);
     }
     
     // draw screen
+    var cellSize = 10;
+    // 縦線
+    for(var i=0;i<=canvas.width;i+=cellSize){
+        context.beginPath();
+        context.moveTo(i,0);
+        context.lineTo(i,canvas.height);
+        context.closePath();
+        context.stroke();
+    }
+    // 横線
+    for(var i=0;i<=canvas.height;i+=cellSize){
+        context.beginPath();
+        context.moveTo(0,i);
+        context.lineTo(canvas.width,i);
+        context.closePath();
+        context.stroke();
+    }
+
     console.log(day+"日目");
 
     return day
 }
+
+
