@@ -62,6 +62,24 @@ function gameRoutine(){
     }
     
     // draw screen
+    var cellSize = 10;
+    // 縦線
+    for(var i=0;i<=canvas.width;i+=cellSize){
+        context.beginPath();
+        context.moveTo(i,0);
+        context.lineTo(i,canvas.height);
+        context.closePath();
+        context.stroke();
+    }
+    // 横線
+    for(var i=0;i<=canvas.height;i+=cellSize){
+        context.beginPath();
+        context.moveTo(0,i);
+        context.lineTo(canvas.width,i);
+        context.closePath();
+        context.stroke();
+    }
+
     console.log(day+"日目");
 
     return day
