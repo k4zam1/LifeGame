@@ -141,16 +141,63 @@ class Animal {
 }
 
 // draw test
-var f1 = new Point(5,5);
-var f2 = new Point(24,60);
 var adam_genes = [0,2,3,5,6,8,1,0];
 var adam = new Animal(50,50,80,0,adam_genes);
 
-var foods = [f1,f2];
+var plants = [];
+var plantAreas = [];
 var animals = [];
 var biome = [];
 var day = 0;
 animals.push(adam);
+
+
+// the frequency of updating plant
+var plantUpdateFrequency = 100;
+
+// the number of the plantAreas
+var plantAreas_number = 8;
+
+// the number of the plants
+var plant_number = 100;
+
+
+// create plant area
+class PlantArea {
+    constructor(minX,rangeX,minY,rangeY){
+        this.plantAreaX = Math.floor(Math.random()*rangeX + minX)/5;
+        this.plantAreaY = Math.floor(Math.random()*rangeY + minY)/5;   
+    }
+}
+
+
+// add to plant areas
+for(var i = 0; i < plantAreas_number; i++){
+    // set area size
+    var pA = new PlantArea(Math.floor(Math.random()*410),Math.floor(Math.random()*20+50),Math.floor(Math.random()*570),Math.floor(Math.random()*20+50));
+    
+    // add new plant area
+    plantAreas.push(pA);
+    
+}
+
+
+function add_plant(){
+    // add to plant in the plant area
+    for(var i = 0; i < plantAreas_number; i++){
+        var p = new Point(Math.floor(Math.random()*plantAreas[i].plantAreaX)*5, Math.floor(Math.random()*plantAreas[i].plantAreaY)*5);
+    
+        // add new plant
+        plants.push(p);
+        
+        if(plants.length > plant_number){
+            // delete old plant
+            plants.shift();
+        }
+        
+    }
+}
+
 
 function gameRoutine(){
     // fresh screen
@@ -158,7 +205,8 @@ function gameRoutine(){
 
     // update world
     ++day;
-    
+    add_plant();
+
     // animals_update
     var new_animals = []
     for(animal of animals){
@@ -182,8 +230,8 @@ function gameRoutine(){
     }
     
     context.fillStyle = "rgb(0,200,0)";
-    for(food of foods){
-        context.fillRect(food.x-2,food.y-3,5,5);
+    for(plant of plants){
+        context.fillRect(plant.x-2,plant.y-3,5,5);
     }
     context.fillStyle = "rgb(200,0,0)";
     for(animal of animals){
