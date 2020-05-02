@@ -7,7 +7,7 @@ var biome = [];
 var plantUpdateFrequency = 100;
 
 // the number of the plantAreas
-var plantAreas_number = 8;
+var plantAreas_number = 7;
 
 // the number of the plants
 var plant_number = 100;
@@ -15,9 +15,10 @@ var plant_number = 100;
 
 // create plant area
 class PlantArea {
-    constructor(minX,rangeX,minY,rangeY){
-        this.plantAreaX = Math.floor(Math.random()*rangeX + minX)/5;
-        this.plantAreaY = Math.floor(Math.random()*rangeY + minY)/5;   
+    constructor(minX,minY,areaRange,randomRange){
+        this.plantAreaX = Math.floor(Math.random()*minX)/cellSize;
+        this.plantAreaY = Math.floor(Math.random()*minY)/cellSize; 
+        this.range = Math.floor(Math.random()*randomRange + areaRange);
     }
 }
 
@@ -25,7 +26,8 @@ class PlantArea {
 // add to plant areas
 for(var i = 0; i < plantAreas_number; i++){
     // set area size
-    var pA = new PlantArea(Math.floor(Math.random()*410),Math.floor(Math.random()*20+50),Math.floor(Math.random()*570),Math.floor(Math.random()*20+50));
+    //areaRange と randomRange はマス目換算
+    var pA = new PlantArea(Math.floor(Math.random()*420),Math.floor(Math.random()*600),5,2);
     
     // add new plant area
     plantAreas.push(pA);
@@ -36,8 +38,9 @@ for(var i = 0; i < plantAreas_number; i++){
 function add_plant(){
     // add to plant in the plant area
     for(var i = 0; i < plantAreas_number; i++){
-        var p = new Point(Math.floor(Math.random()*plantAreas[i].plantAreaX)*5, Math.floor(Math.random()*plantAreas[i].plantAreaY)*5);
-    
+        var p = new Point(Math.floor(Math.random()*plantAreas[i].range + plantAreas[i].plantAreaX)*cellSize,Math.floor(Math.random()*plantAreas[i].range + plantAreas[i].plantAreaY)*cellSize);
+
+        
         // add new plant
         plants.push(p);
         
@@ -48,3 +51,5 @@ function add_plant(){
         
     }
 }
+
+
