@@ -15,21 +15,21 @@ class Animal {
     move(){
         // xについての移動
         if(2 <= this.dir && this.dir < 5){
-            this.x += 5;
+            this.x += cellSize;
         }
         else if(this.dir == 1 || this.dir == 5){
             this.x += 0;
         }
         else {
-            this.x -= 5;
+            this.x -= cellSize;
         }
 
         // yについての移動
         if(0 <= this.dir && this.dir < 3){
-            this.y -= 5;
+            this.y -= cellSize;
         }
         else if(4 <= this.dir && this.dir < 7){
-            this.y += 5;
+            this.y += cellSize;
         }
 
         this.x = this.x % (canvas.width-1);

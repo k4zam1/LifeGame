@@ -52,17 +52,23 @@ function gameRoutine(){
         animals.push(child);
     }
     
+    drawScreen();
+    console.log(day+"日目");
+
+    return day
+}
+
+
+function drawScreen(){
     context.fillStyle = "rgb(0,200,0)";
     for(plant of plants){
-        context.fillRect(plant.x-2,plant.y-3,5,5);
+        context.fillRect(plant.x,plant.y,cellSize,cellSize);
     }
     context.fillStyle = "rgb(200,0,0)";
     for(animal of animals){
-        context.fillRect(animal.x-2,animal.y-3,5,5);
+        context.fillRect(animal.x,animal.y,cellSize,cellSize);
     }
-    
-    // draw screen
-    var cellSize = 10;
+
     // 縦線
     for(var i=0;i<=canvas.width;i+=cellSize){
         context.beginPath();
@@ -79,10 +85,4 @@ function gameRoutine(){
         context.closePath();
         context.stroke();
     }
-
-    console.log(day+"日目");
-
-    return day
 }
-
-

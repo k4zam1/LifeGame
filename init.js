@@ -1,5 +1,6 @@
 var canvas = document.getElementById("canvas");
 var context = canvas.getContext("2d");
+var cellSize = 10;
 
 /* イベントの登録 */
 function onDown(e){
