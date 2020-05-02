@@ -41,6 +41,12 @@ class Point {
         this.x = x;
         this.y = y;
     }
+    eq(point){
+        if(this.x == point.x && this.y == point.y){
+            return true;
+        }
+        return false;
+    }
 }
 function sum(arr){
     var s = 0;
@@ -52,4 +58,11 @@ function sum(arr){
 function getRandomInt(min,max){
     var rand = Math.floor(Math.random()*(max+1-min))+min;
     return rand;
+}
+function deepCopyArray(sourceArray){
+    var newArray = [];
+    for(s of sourceArray){
+        newArray.push(s);
+    }
+    return newArray;
 }
