@@ -2,7 +2,7 @@
 /* Animal関連のグローバル変数 */
 var animals = [];               // すべての動物が記録される変数
 var reproduction_energy = 10;   // 子孫を残すのに必要なエネルギー
-var repoduction_interval = 3;   // 子孫を何日ごとに残すか
+var reproduction_interval = 3;   // 子孫を何日ごとに残すか
 
 
 class Animal {
@@ -10,6 +10,8 @@ class Animal {
         // type:num
         this.x = x;
         this.y = y;
+        this.point = new Point(x,y);
+
         this.energy = energy;
         this.dir = direction;
 
@@ -57,15 +59,24 @@ class Animal {
         }
     }
 
-    //todo: eat
+    eat(){
+        for(var i=0;i<plants.length;i++){
+            if(this.point.eq(plants[i])){
+                this.energy += 2;
+                // i番目の植物を削除して詰める
+                plants.splice(i,i);
+                break;
+            }
+        }
+    }
 
     reproduce(){
         if(this.energy < reproduction_energy){
-            return;
+            return null;
         }
 
         var energy = Math.floor(this.energy/2);
-        var genes = Object.create(this.genes);
+        var genes = deepCopyArray(this.genes);
 
         // 突然変異 -1,0,1をランダムのスロットに加算
         var slot = getRandomInt(0,7);
@@ -76,25 +87,26 @@ class Animal {
     }
 }
 
-
-
 /* すべての動物の状態をアップデートする */
 function updateAnimals(){
-    var new_animals = []
+    var newAnimals = []
     for(animal of animals){
-        if(animal.energy > 0){
-            new_animals.push(animal);
+        if(animal instanceof Animal && animal.energy > 0){
+            newAnimals.push(animal);
         }
     }
-    animals = Object.create(new_animals);
+    animals = deepCopyArray(newAnimals);
+    
     var childs = [];
     for(animal of animals){
         animal.turn();
         animal.move();
-        //animal.eat();
-        if(day%reproduce_interval == 0){
+        animal.eat();
+        if(day%reproduction_interval == 0){
             var child = animal.reproduce();
-            childs.push(child);
+            if(child != null){
+                childs.push(child);
+            }
         }
     }
     for(child of childs){
