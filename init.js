@@ -1,6 +1,9 @@
+
+/* ライフゲーム全体で使用するグローバル変数 */
 var canvas = document.getElementById("canvas");
 var context = canvas.getContext("2d");
 var cellSize = 10;
+var day = 0;
 
 /* イベントの登録 */
 function onDown(e){
