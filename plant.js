@@ -1,4 +1,3 @@
-
 var plants = [];
 var plantAreas = [];
 
@@ -50,5 +49,3 @@ function add_plant(){
         */
     }
 }
-
-

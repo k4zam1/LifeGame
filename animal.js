@@ -2,15 +2,17 @@
 /* Animal関連のグローバル変数 */
 var animals = [];               // すべての動物が記録される変数
 var reproduction_energy = 10;   // 子孫を残すのに必要なエネルギー
-var reproduction_interval = 3;   // 子孫を何日ごとに残すか
-
+var reproduction_interval = 3;  // 子孫を何日ごとに残すか
+var id = 0;
 
 class Animal {
     constructor(x,y,energy,direction,genes){
+        this.id = id;
+        id++;
+        
         // type:num
         this.x = x;
         this.y = y;
-        this.point = new Point(x,y);
 
         this.energy = energy;
         this.dir = direction;
@@ -39,8 +41,14 @@ class Animal {
             this.y += cellSize;
         }
 
-        this.x = this.x % (canvas.width-1);
+        this.x = this.x % canvas.width;
         this.y = this.y % canvas.height;
+        if(this.x < 0){
+            this.x += canvas.width;
+        }
+        if(this.y < 0){
+            this.y += canvas.height;
+        }
         this.energy -= 1;
     }
 
@@ -59,9 +67,11 @@ class Animal {
         }
     }
 
+    // todo:位置バグ修正
     eat(){
+        var animalPoint = new Point(this.x,this.y);
         for(var i=0;i<plants.length;i++){
-            if(this.point.eq(plants[i])){
+            if(animalPoint.eq(plants[i])){
                 this.energy += 2;
                 // i番目の植物を削除して詰める
                 plants.splice(i,i);
@@ -86,6 +96,9 @@ class Animal {
         return child;
     }
 }
+
+// todo: 種族の作成
+
 
 /* すべての動物の状態をアップデートする */
 function updateAnimals(){
@@ -112,4 +125,14 @@ function updateAnimals(){
     for(child of childs){
         animals.push(child);
     }
+}
+
+function inAnimals(point){
+    for(animal of animals){
+        var animalPoint = new Point(animal.x,animal.y);
+        if(animalPoint.eq(point)){
+            return animal.id;
+        }
+    }
+    return null;
 }
