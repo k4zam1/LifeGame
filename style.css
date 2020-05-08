@@ -7,9 +7,11 @@ body {
 }
 
 div#informationBox {
+    color:#FFF;
+    padding : 20px ;
     border: solid 1px #000000;
     width:200px;
-    height:480px;
+    height:440px;
     display: inline-block;
     vertical-align: top;
 }

@@ -11,6 +11,14 @@ var plantAreas_count = 10;
 var plants_count = 100;
 
 
+class Plant {
+    constructor(x,y){
+        this.x = x;
+        this.y = y;
+        this.color = "rgb(0,200,0)";
+        this.type = "plant"
+    }
+}
 class PlantArea {
     constructor(minX,minY,areaRange,randomRange){
         this.plantAreaX = Math.floor(Math.random()*minX)/cellSize;
@@ -32,14 +40,13 @@ for(var i = 0; i < plantAreas_count; i++){
 }
 
 function add_plant(){
-    
     // 各繁殖エリア内で植物をランダムに作成
     for(var i = 0; i < plantAreas_count; i++){
         var p = new Point(Math.floor(Math.random()*plantAreas[i].range + plantAreas[i].plantAreaX)*cellSize,Math.floor(Math.random()*plantAreas[i].range + plantAreas[i].plantAreaY)*cellSize);
+        var plant = new Plant(p.x,p.y);
 
-        
         // 植物を配列plantsに追加
-        plants.push(p);
+        plants.push(plant);
         /*
         if(plants.length > plants_count){
             // 増えすぎた植物を古い順に削除

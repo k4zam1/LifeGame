@@ -16,16 +16,28 @@ var select = null;
 
 /* イベントの登録 */
 function onDown(e){
-    // クリックした動物の情報を表示する
+    // クリックした位置のオブジェクトのIDをselectに代入して
+    // drawScreen()に処理を任せる
     var mousePoint = new Point(cellLeft,cellTop);
-    var animalID = inAnimals(mousePoint);
-    if(animalID == null) return;
-    if(select != animalID){
-        // はじめてクリックした個体はselectに記録
-        select = animalID;
+    var objID = null;
+    var inObject = function(objects){
+        for(obj of objects){
+            var objPoint = new Point(obj.x,obj.y);
+            if(objPoint.eq(mousePoint)){
+                return obj.id;
+            }
+        }
+        return null;
     }
-    
-    
+    for(objects of allObjects){
+        objID = inObject(objects);
+        if(objID != null){
+            select = objID;
+            break;
+        }
+    }
+    //-----------------------------------------------
+
 
     // on mouse downのコードをここに移しました
     if(e.button == 0){

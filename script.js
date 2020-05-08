@@ -1,10 +1,13 @@
 function main(){
     // draw test(あとで消すこと)
-    var adam_genes = [0,2,3,2,2,2,1,0];
+    var adam_genes = [1,0,1,0,1,0,1,0];
     var adam = new Animal(50,50,80,0,adam_genes);
     animals.push(adam);
-    // draw test　ここまで
 
+    var predator_genes = [1,1,2,1,1,1,1,0]
+    var adam_predator = new Predator(60,80,80,0,predator_genes);
+    predators.push(adam_predator);
+    // draw test　ここまで
 
     // initialize
     canvas.height = 480;
@@ -22,30 +25,32 @@ function main(){
     },1000);
 }
 
+// 一日に一回行われる関数
+// 環境のアップデート・描画のすべてを集約している
+var allObjects = null;
 function gameRoutine(){
-    // update
     ++day;
+
+    // objectの更新
     add_plant();
-    updateAnimals();
-    
+    predators = updateCreatures(predators);
+    animals = updateCreatures(animals);
+    allObjects = [plants,predators,animals];
+
     // draw
     drawScreen();
-    console.log(day+"日目");
     return day
 }
 
 
+// すべての描画を行う関数
 function drawScreen(){
     // fresh screen
     context.clearRect(0,0,canvas.width,canvas.height);
 
-    context.fillStyle = "rgb(0,200,0)";
-    for(plant of plants){
-        context.fillRect(plant.x,plant.y,cellSize,cellSize);
-    }
-    context.fillStyle = "rgb(200,0,0)";
-    for(animal of animals){
-        context.fillRect(animal.x,animal.y,cellSize,cellSize);
+    // 全オブジェクトの描画
+    for(obj of allObjects){
+        drawObject(obj);
     }
 
     // 縦線
@@ -65,29 +70,48 @@ function drawScreen(){
         context.stroke();
     }
 
+
+    // 何日目かを描画する
+    var textBox = document.getElementById("informationBox");
+    var dayInformation = "<p>DAY:"+day+"</p><br/>";
+
     // 選択している個体の情報を表示
     if(select != null){
-        var i = 0;
-        var index = null;
-        for(animal of animals){
-            if(animal.id == select){
-                index = i;
-                break;
+        var notFoundSelectedObject = true;
+        for(objects of allObjects){
+            for(obj of objects){
+                if(select == obj.id){
+                    var text = dayInformation
+                        + "<p>ID:"+obj.id+"<br/>"
+                        + "type:"+obj.type+"<br/>"
+                        + "x:"+ obj.x + "y:" + obj.y +"<br/>"
+                        + "energy:" + obj.energy+"<br/>"
+                        + "genes:"+obj.genes+"</p>";
+                    textBox.innerHTML = text;
+                    context.fillStyle = "rgb(200,200,0)";
+                    context.fillRect(obj.x,obj.y,cellSize,cellSize);
+                    notFoundSelectedObject = false;
+                    break;
+                }
             }
-            i++;
         }
-        // idを持つ個体がいない
-        if(index == null){
+        // idを持つ個体がいなかった
+        if(notFoundSelectedObject){
             select = null;
             return;
         }
+    }
+    // 何も選択していないとき
+    else {
+        textBox.innerHTML = dayInformation;
+    }
+}
 
-        // idを持つ個体がいた
-        var animal = animals[index];
-        var textBox = document.getElementById("informationBox");
-        var text = "<p>ID:"+animal.id+"</p><br/>"+"<p>x:"+ animal.x + "y:" + animal.y + "energy:" + animal.energy+"</p>";
-        textBox.innerHTML = text;
-        context.fillStyle = "rgb(200,200,0)";
-        context.fillRect(animal.x,animal.y,cellSize,cellSize);
+// 描画するオブジェクトの集合drawObjectが与えられると
+// そのなかのすべてを描画する関数
+function drawObject(drawObject){
+    for(obj of drawObject){
+        context.fillStyle = obj.color;
+        context.fillRect(obj.x,obj.y,cellSize,cellSize);
     }
 }
