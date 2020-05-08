@@ -4,12 +4,14 @@ var context = canvas.getContext("2d");
 var cellSize = 10;
 var day = 0;
 
+
 // マウスの位置情報を記録する変数
 var mouseX = 0;
 var mouseY = 0;
 var cellLeft = 0;
 var cellTop = 0;
 var mouseout = false;
+
 
 // 現在選択しているセルのIDを記録する
 var select = null;
@@ -67,10 +69,10 @@ function onUp(e){
 }
 
 function onClick(e){
-
+    //console.log("click");
 }
 
-function onOver(e) {
+function onOver() {
     //console.log("mouseover");
     mouseout = false;
 }
@@ -78,6 +80,7 @@ function onOver(e) {
 function onOut(e){
     //console.log("mouseout");
     mouseout = true;
+
 }
 
 function onMove(e){
@@ -86,7 +89,9 @@ function onMove(e){
     mouseY = e.offsetY;
     cellLeft = (Math.floor(mouseX/10))*10;
     cellTop = (Math.floor(mouseY/10))*10;
+  
 }
+
 
 function eventRegister(){
     /* 
@@ -99,7 +104,9 @@ function eventRegister(){
     canvas.addEventListener('mouseover', onOver, false);
     canvas.addEventListener('mouseout', onOut, false);
     canvas.addEventListener('mousemove',onMove,false);
+  
 }
+
 
 // animal,plant共通
 class Point {
