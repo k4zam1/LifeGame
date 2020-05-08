@@ -5,3 +5,11 @@ body {
 #canvas {
     background: #777;
 }
+
+div#informationBox {
+    border: solid 1px #000000;
+    width:200px;
+    height:480px;
+    display: inline-block;
+    vertical-align: top;
+}

@@ -1,6 +1,6 @@
 function main(){
     // draw test(あとで消すこと)
-    var adam_genes = [0,2,3,5,6,8,1,0];
+    var adam_genes = [0,2,3,2,2,2,1,0];
     var adam = new Animal(50,50,80,0,adam_genes);
     animals.push(adam);
     // draw test　ここまで
@@ -63,5 +63,31 @@ function drawScreen(){
         context.lineTo(canvas.width,i);
         context.closePath();
         context.stroke();
+    }
+
+    // 選択している個体の情報を表示
+    if(select != null){
+        var i = 0;
+        var index = null;
+        for(animal of animals){
+            if(animal.id == select){
+                index = i;
+                break;
+            }
+            i++;
+        }
+        // idを持つ個体がいない
+        if(index == null){
+            select = null;
+            return;
+        }
+
+        // idを持つ個体がいた
+        var animal = animals[index];
+        var textBox = document.getElementById("informationBox");
+        var text = "<p>ID:"+animal.id+"</p><br/>"+"<p>x:"+ animal.x + "y:" + animal.y + "energy:" + animal.energy+"</p>";
+        textBox.innerHTML = text;
+        context.fillStyle = "rgb(200,200,0)";
+        context.fillRect(animal.x,animal.y,cellSize,cellSize);
     }
 }
