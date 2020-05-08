@@ -3,7 +3,10 @@
 var animals = [];       // すべての動物が記録される変数(記録配列)
 var predators = [];     // すべての捕食者が記録されている変数(記録配列)
 
+
+
 // オブジェクトにIDを振ってくれるアロケーター
+// クリックするオブジェクトにはこれでIDを割り振ること
 class IDAllocator {
     constructor(){
         this.id = -1;
@@ -14,6 +17,8 @@ class IDAllocator {
     }
 }
 idAllocator = new IDAllocator();
+
+
 
 // 草食動物
 class Animal {
@@ -80,7 +85,7 @@ class Animal {
         var animalPoint = new Point(this.x,this.y);
         for(var i=0;i<plants.length;i++){
             if(animalPoint.eq(plants[i])){
-                this.energy += 15;
+                this.energy += 10;
                 //console.log("eat:",plants[i]);
                 // i番目の植物を削除して詰める
                 plants.splice(i,1);
@@ -106,19 +111,21 @@ class Animal {
     }
 }
 
+
+
 // 捕食者
 class Predator extends Animal {
     constructor(x,y,energy,direction,genes){
         super(x,y,energy,direction,genes);
         this.type = "predator";
         this.color = "rgb(0,0,200)"
-        this.reproduction_interval = 10;
+        this.reproduction_interval = 20;
     }
     eat(){
         var point = new Point(this.x,this.y);
         for(var i=0;i<animals.length;i++){
             if(point.eq(animals[i])){
-                this.energy += 10;
+                this.energy += 7;
                 //console.log("eat:",plants[i]);
                 // i番目の植物を削除して詰める
                 animals.splice(i,1);
@@ -143,13 +150,15 @@ class Predator extends Animal {
     }
 }
 
+
+
+
 /* すべての生物の状態をアップデートする */
 function updateAllCreatures(){
     predators = updateCreatures(predators);
     animals = updateCreatures(animals);    
     
     //!! 新しい生物種を追加したらここにupdateを記述する
-
 }
 
 
