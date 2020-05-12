@@ -35,7 +35,7 @@ function gameRoutine(){
     add_plant();
     predators = updateCreatures(predators);
     animals = updateCreatures(animals);
-    allObjects = [plants,predators,animals];
+    allObjects = [plants,predators,animals,walls];
 
     // draw
     drawScreen();

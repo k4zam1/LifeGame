@@ -17,7 +17,7 @@ var mouseout = false;
 var select = null;
 
 /* イベントの登録 */
-function onDown(e){
+function onDown(e){    
     // クリックした位置のオブジェクトのIDをselectに代入して
     // drawScreen()に処理を任せる
     var mousePoint = new Point(cellLeft,cellTop);
@@ -38,11 +38,10 @@ function onDown(e){
             break;
         }
     }
-    //-----------------------------------------------
-
-
-    // on mouse downのコードをここに移しました
-    if(e.button == 0){
+    
+    
+    // shift + click で壁を生成
+    if(e.shiftKey){
         var intervalID2 = setInterval(function(){
             
             // カーソルがキャンパス外に出た場合、処理を終了
@@ -50,11 +49,54 @@ function onDown(e){
                clearInterval(intervalID2);
             }
             
-            // カーソルのあるセルの情報を読み取る関数
-            // 壁を作成する関数 動植物がある場合はそれを削除してから作成
-            //console.log(mouseX, mouseY, cellLeft, cellTop);
+            mousePoint = new Point(cellLeft,cellTop);
             
-            // 左クリックを終えたときの処理
+            // オブジェクトがあった場合、それを削除する
+            for(objects of allObjects){
+                for(var i=0;i<objects.length;i++){
+                    if(mousePoint.eq(objects[i])){
+                        objects.splice(i,1);
+                        break;
+                    }
+                }
+            }
+            createWall(cellLeft,cellTop);
+            //console.log(walls);
+            
+            // クリックを終えたとき、処理を終了
+            canvas.onmouseup = function(e){
+                if(e.button == 0){
+                    clearInterval(intervalID2);
+                }
+            }
+        },20);
+    }
+
+    
+    // alt + click で壁を削除
+    if(e.altKey){
+        var intervalID2 = setInterval(function(){
+            
+            // カーソルがキャンパス外に出た場合、処理を終了
+            if(mouseout){
+               clearInterval(intervalID2);
+            }
+            
+            mousePoint = new Point(cellLeft,cellTop);
+            
+            // 壁オブジェクトがあった場合、それを削除する
+            for(var i=0;i<walls.length;i++){
+                if(mousePoint.eq(walls[i])){
+                    walls.splice(i,1);
+                    
+                    // gameRoutineに依存せず即座に描画
+                    context.fillStyle ="rgb(100,100,100)";
+                    context.fillRect(cellLeft,cellTop,cellSize,cellSize);
+                    break;
+                }
+            }
+
+            // クリックを終えたとき、処理を終了
             canvas.onmouseup = function(e){
                 if(e.button == 0){
                     clearInterval(intervalID2);
@@ -63,6 +105,7 @@ function onDown(e){
         },20);
     }
 }
+
 
 function onUp(e){
     //console.log("onUp");
