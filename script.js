@@ -19,10 +19,10 @@ function main(){
         var gameDay = gameRoutine();
 
         // 1000日経過で終了
-        if(gameDay >= 1000){
+        if(gameDay >= 10000){
             clearInterval(intervalID);
         }
-    },1000);
+    },30);
 }
 
 // 一日に一回行われる関数
@@ -35,7 +35,7 @@ function gameRoutine(){
     add_plant();
     predators = updateCreatures(predators);
     animals = updateCreatures(animals);
-    allObjects = [plants,predators,animals];
+    allObjects = [plants,animals,predators,walls];
 
     // draw
     drawScreen();
