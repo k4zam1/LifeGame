@@ -36,33 +36,47 @@ class Animal {
     }
 
     move(){
+        var next = new Point(this.x,this.y);
+
         // xについての移動,cellSizeを単位とする
         if(2 <= this.dir && this.dir < 5){
-            this.x += cellSize;
+            next.x += cellSize;
         }
         else if(this.dir == 1 || this.dir == 5){
-            this.x += 0;
+            next.x += 0;
         }
         else {
-            this.x -= cellSize;
+            next.x -= cellSize;
         }
 
         // yについての移動,cellSizeを単位とする
         if(0 <= this.dir && this.dir < 3){
-            this.y -= cellSize;
+            next.y -= cellSize;
         }
         else if(4 <= this.dir && this.dir < 7){
-            this.y += cellSize;
+            next.y += cellSize;
         }
 
-        this.x = this.x % canvas.width;
-        this.y = this.y % canvas.height;
-        if(this.x < 0){
-            this.x += canvas.width;
+        // 端移動の処理
+        next.x = next.x % canvas.width;
+        next.y = next.y % canvas.height;
+        if(next.x < 0){
+            next.x += canvas.width;
         }
-        if(this.y < 0){
-            this.y += canvas.height;
+        if(next.y < 0){
+            next.y += canvas.height;
         }
+
+        // オブジェクトの判定
+        for(var wall of walls){
+            if(wall.point.eq(next)){
+                return;
+            }
+        }
+
+        // 情報の更新
+        this.x = next.x;
+        this.y = next.y;
         this.energy -= 1;
     }
 
@@ -86,7 +100,6 @@ class Animal {
         for(var i=0;i<plants.length;i++){
             if(animalPoint.eq(plants[i])){
                 this.energy += 10;
-                //console.log("eat:",plants[i]);
                 // i番目の植物を削除して詰める
                 plants.splice(i,1);
                 break;
@@ -125,11 +138,34 @@ class Predator extends Animal {
         var point = new Point(this.x,this.y);
         for(var i=0;i<animals.length;i++){
             if(point.eq(animals[i])){
-                this.energy += 7;
-                //console.log("eat:",plants[i]);
+                this.energy += 5;
                 // i番目の植物を削除して詰める
                 animals.splice(i,1);
                 break;
+            }
+        }
+        // 生態系の頂点に達した生物は敵が同じ種族になる
+        // 同種どうしの殺戮は、人口抑制として機能するのでpredator同士を戦わせる
+        for(var i=0;i<predators.length;i++){
+            if(point.eq(predators[i]) && predators[i].id != this.id){
+                // this.energy += 7;
+                
+                // energyの高いほうが強いpredator
+                if(this.energy > predators[i].energy){
+                    console.log("win predator :"+this.id+"vs predator :"+predators[i].id);
+                    predators.splice(i,1);
+                    break;
+                }
+                // 負けた場合自分を消去する
+                else {
+                    for(var j=0;j<predators.length;j++){
+                        if(predators[j].id == this.id){
+                            console.log("lose predator :"+this.id+"vs predator :"+predators[j].id);
+                            predators.splice(j,1);
+                            break;
+                        }
+                    }
+                }
             }
         }
     }

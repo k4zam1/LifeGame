@@ -7,6 +7,7 @@ class Wall{
         this.y = y;
         this.type = "block";
         this.color = "rgb(0,0,0)"
+        this.point = new Point(x,y);
     }
 }
 
