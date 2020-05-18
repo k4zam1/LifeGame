@@ -13,10 +13,29 @@ var cellTop = 0;
 var mouseout = false;
 
 
+// マウスのモードを記録する変数
+var mouseModes = ["information","createWall","extinction"]
+var modeNumber = 0;
+var mouseMode = mouseModes[modeNumber];
+document.onkeydown = keyDown;
+
+
 // 現在選択しているセルのIDを記録する
 var select = null;
 
 /* イベントの登録 */
+function keyDown(e){
+    if(e.shiftKey){
+        modeNumber++;
+    }
+    else if (e.altKey){
+        modeNumber--;
+    }
+    modeNumber = modeNumber%3;
+    mouseMode = mouseModes[modeNumber];
+    //console.log(mouseMode);
+}
+
 function onDown(e){    
     // クリックした位置のオブジェクトのIDをselectに代入して
     // drawScreen()に処理を任せる
@@ -31,17 +50,21 @@ function onDown(e){
         }
         return null;
     }
-    for(objects of allObjects){
-        objID = inObject(objects);
-        if(objID != null){
-            select = objID;
-            break;
+    
+    // information の場合、オブジェクトの情報を表示
+    if(modeNumber == 0){
+        for(objects of allObjects){
+            objID = inObject(objects);
+            if(objID != null){
+                select = objID;
+                break;
+            }
         }
     }
     
     
-    // shift + click で壁を生成
-    if(e.shiftKey){
+    // createWall の場合、壁を生成
+    if(modeNumber == 1){
         var intervalID2 = setInterval(function(){
             
             // カーソルがキャンパス外に出た場合、処理を終了
@@ -73,8 +96,8 @@ function onDown(e){
     }
 
     
-    // alt + click で壁を削除
-    if(e.altKey){
+    // extinguish の場合、オブジェクトを削除
+    if(modeNumber == 2){
         var intervalID2 = setInterval(function(){
             
             // カーソルがキャンパス外に出た場合、処理を終了
@@ -84,6 +107,16 @@ function onDown(e){
             
             mousePoint = new Point(cellLeft,cellTop);
             
+            // オブジェクトがあった場合、それを削除する
+            for(objects of allObjects){
+                for(var i=0;i<objects.length;i++){
+                    if(mousePoint.eq(objects[i])){
+                        objects.splice(i,1);
+                        break;
+                    }
+                }
+            }
+            /*
             // 壁オブジェクトがあった場合、それを削除する
             for(var i=0;i<walls.length;i++){
                 if(mousePoint.eq(walls[i])){
@@ -95,7 +128,7 @@ function onDown(e){
                     break;
                 }
             }
-
+            */
             // クリックを終えたとき、処理を終了
             canvas.onmouseup = function(e){
                 if(e.button == 0){

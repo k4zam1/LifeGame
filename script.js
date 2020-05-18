@@ -82,6 +82,7 @@ function drawScreen(){
             for(obj of objects){
                 if(select == obj.id){
                     var text = dayInformation
+                        + "<p>mode:"+mouseMode+"<br/>"
                         + "<p>ID:"+obj.id+"<br/>"
                         + "type:"+obj.type+"<br/>"
                         + "x:"+ obj.x + "y:" + obj.y +"<br/>"
@@ -103,7 +104,9 @@ function drawScreen(){
     }
     // 何も選択していないとき
     else {
-        textBox.innerHTML = dayInformation;
+        var text = dayInformation
+            + "<p>mode:"+mouseMode+"</p>";
+        textBox.innerHTML = text;
     }
 }
 
