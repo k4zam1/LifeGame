@@ -1,4 +1,19 @@
 function main(){
+    var player = null;
+
+    var species = document.getElementById("species");
+    var radioNodeList = species.name;
+    for(var i=0;i<radioNodeList.length;i++){
+        if(radioNodeList[i].checked){
+            player = radioNodeList[i].value;
+        } 
+    }
+    if(player === null){
+        console.log("モードを選択してください");
+        return;
+    }
+    console.log("you select :",player);
+
     // draw test(あとで消すこと)
     var adam_genes = [1,0,1,0,1,0,1,0];
     var adam = new Animal(50,50,80,0,adam_genes);
@@ -19,10 +34,26 @@ function main(){
         var gameDay = gameRoutine();
 
         // 1000日経過で終了
-        if(gameDay >= 10000){
+        if(gameDay >= 1000){
             clearInterval(intervalID);
+            var winner;
+            if(animals.length >= predators.length){
+                winner = "Animal";
+            }
+            else {
+                winner = "Predator";
+            }
+
+            if(player == winner){
+                console.log("YOU WIN");
+            }
+            else {
+                console.log("YOU LOSE");
+            }
         }
     },30);
+    
+    
 }
 
 // 一日に一回行われる関数
@@ -82,6 +113,7 @@ function drawScreen(){
             for(obj of objects){
                 if(select == obj.id){
                     var text = dayInformation
+                        + "<p>mode:"+mouseMode+"<br/>"
                         + "<p>ID:"+obj.id+"<br/>"
                         + "type:"+obj.type+"<br/>"
                         + "x:"+ obj.x + "y:" + obj.y +"<br/>"
@@ -103,7 +135,9 @@ function drawScreen(){
     }
     // 何も選択していないとき
     else {
-        textBox.innerHTML = dayInformation;
+        var text = dayInformation
+            + "<p>mode:"+mouseMode+"</p>";
+        textBox.innerHTML = text;
     }
 }
 
