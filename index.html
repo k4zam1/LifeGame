@@ -4,7 +4,12 @@
 <link rel="stylesheet" type="text/css" href="style.css"/>
 <body>
     <canvas id="canvas" width="0" height="0"></canvas>
-    <div id="informationBox"></div>
+    <div id="informationBox">
+        <form id="species">
+            <input name="name" type="radio" value="Animal"> Animal　
+            <input name="name" type="radio" value="Predator"> Predator
+        </form>
+    </div>
     <script src="init.js"></script>
     <script src="animal.js"></script>
     <script src="plant.js"></script>
