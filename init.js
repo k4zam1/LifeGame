@@ -14,9 +14,10 @@ var mouseout = false;
 
 
 // マウスのモードを記録する変数
-var mouseModes = ["information","createWall","extinction"]
+var mouseModes = ["information","createWall","breakWall"]
 var modeNumber = 0;
 var mouseMode = mouseModes[modeNumber];
+var modeChanging = false;
 document.onkeydown = keyDown;
 
 
@@ -25,6 +26,8 @@ var select = null;
 
 /* イベントの登録 */
 function keyDown(e){
+    modeChanging = true;
+    
     if(e.shiftKey){
         modeNumber++;
     }
@@ -65,34 +68,53 @@ function onDown(e){
     
     // createWall の場合、壁を生成
     if(modeNumber == 1){
-        var intervalID2 = setInterval(function(){
+        if(walls.length >= wall_count){
+            //ブブーなどのサウンドを鳴らしてみるか検討中
             
-            // カーソルがキャンパス外に出た場合、処理を終了
-            if(mouseout){
-               clearInterval(intervalID2);
-            }
-            
-            mousePoint = new Point(cellLeft,cellTop);
-            
-            // オブジェクトがあった場合、それを削除する
-            for(objects of allObjects){
-                for(var i=0;i<objects.length;i++){
-                    if(mousePoint.eq(objects[i])){
-                        objects.splice(i,1);
-                        break;
-                    }
-                }
-            }
-            createWall(cellLeft,cellTop);
-            //console.log(walls);
-            
-            // クリックを終えたとき、処理を終了
-            canvas.onmouseup = function(e){
-                if(e.button == 0){
+        } else {
+            var intervalID2 = setInterval(function(){
+
+                // カーソルがキャンパス外に出た場合、処理を終了
+                if(mouseout){
                     clearInterval(intervalID2);
                 }
-            }
-        },20);
+
+                // mouseModeが変更されていた場合、処理を終了
+                else if(modeChanging){
+                    clearInterval(intervalID2);
+                    modeChanging = false;
+                }
+
+                // 壁の数が上限に達した場合、処理を終了
+                else if(walls.length >= wall_count){
+                    clearInterval(intervalID2);
+                    //サウンドの検討
+                }
+
+                mousePoint = new Point(cellLeft,cellTop);
+
+
+
+                // オブジェクトがあった場合、それを削除する
+                for(objects of allObjects){
+                    for(var i=0;i<objects.length;i++){
+                        if(mousePoint.eq(objects[i])){
+                            objects.splice(i,1);
+                            break;
+                        }
+                    }
+                }
+                createWall(cellLeft,cellTop);
+                //console.log(walls);
+
+                // クリックを終えたとき、処理を終了
+                canvas.onmouseup = function(e){
+                    if(e.button == 0){
+                        clearInterval(intervalID2);
+                    }
+                }
+            },20);
+        }
     }
 
     
@@ -102,11 +124,18 @@ function onDown(e){
             
             // カーソルがキャンパス外に出た場合、処理を終了
             if(mouseout){
-               clearInterval(intervalID2);
+                clearInterval(intervalID2);
+            }
+            
+            // mouseModeが変更されていた場合、処理を終了
+            else if(modeChanging){
+                clearInterval(intervalID2);
+                modeChanging = false;
             }
             
             mousePoint = new Point(cellLeft,cellTop);
             
+            /*
             // オブジェクトがあった場合、それを削除する
             for(objects of allObjects){
                 for(var i=0;i<objects.length;i++){
@@ -116,11 +145,14 @@ function onDown(e){
                     }
                 }
             }
-            /*
+            */
+            
+            
             // 壁オブジェクトがあった場合、それを削除する
             for(var i=0;i<walls.length;i++){
                 if(mousePoint.eq(walls[i])){
                     walls.splice(i,1);
+                    remainingWalls = wall_count - walls.length;
                     
                     // gameRoutineに依存せず即座に描画
                     context.fillStyle ="rgb(100,100,100)";
@@ -128,7 +160,8 @@ function onDown(e){
                     break;
                 }
             }
-            */
+            
+            
             // クリックを終えたとき、処理を終了
             canvas.onmouseup = function(e){
                 if(e.button == 0){
