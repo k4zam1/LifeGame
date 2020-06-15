@@ -62,9 +62,10 @@ function gameRoutine(){
 
     // objectの更新
     add_plant();
+    add_resource(canvas.width,canvas.height,cellSize);
     predators = updateCreatures(predators);
     animals = updateCreatures(animals);
-    allObjects = [plants,animals,predators,walls];
+    allObjects = [plants,animals,predators,resources,walls];
 
     // draw
     drawScreen();
@@ -84,6 +85,7 @@ function drawScreen(){
 
     // 縦線
     for(var i=0;i<=canvas.width;i+=cellSize){
+        context.strokeStyle ="rgb(0,0,0)";
         context.beginPath();
         context.moveTo(i,0);
         context.lineTo(i,canvas.height);
@@ -92,11 +94,19 @@ function drawScreen(){
     }
     // 横線
     for(var i=0;i<=canvas.height;i+=cellSize){
+        context.strokeStyle ="rgb(0,0,0)";
         context.beginPath();
         context.moveTo(0,i);
         context.lineTo(canvas.width,i);
         context.closePath();
         context.stroke();
+    }
+
+
+    // ハイライト
+    if(!mouseout){
+        context.strokeStyle ="rgb(250,250,0)";
+        context.strokeRect(cellLeft,cellTop,cellSize,cellSize);
     }
 
 
@@ -112,7 +122,8 @@ function drawScreen(){
                 if(select == obj.id){
                     var text = dayInformation
                         + "<p>mode:"+mouseMode+"<br/>"
-                        + "<P>remaining walls:"+remainingWalls+"<br/>"
+                        + "<p>remaining walls:"+remainingWalls+"<br/>"
+                        + "<p>tank :"+tank+"<br/>"
                         + "<p>ID:"+obj.id+"<br/>"
                         + "type:"+obj.type+"<br/>"
                         + "x:"+ obj.x + "y:" + obj.y +"<br/>"
@@ -136,6 +147,7 @@ function drawScreen(){
     else {
         var text = dayInformation
             + "<p>mode:"+mouseMode+"<br/>"
+            + "<p>tank :"+tank+"<br/>"
             + "<P>remaining walls:"+remainingWalls+"</p>";
         textBox.innerHTML = text;
     }
