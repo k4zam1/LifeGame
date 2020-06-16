@@ -1,31 +1,3 @@
-/* ライフゲーム全体で使用するグローバル変数 */
-var canvas = document.getElementById("canvas");
-var context = canvas.getContext("2d");
-var cellSize = 10;
-var widthSize = 640;
-var heightSize = 480;
-var day = 0;
-
-// マウスの位置情報を記録する変数
-var mouseX = 0;
-var mouseY = 0;
-var cellLeft = 0;
-var cellTop = 0;
-var mouseout = false;
-
-
-// マウスのモードを記録する変数
-var mouseModes = ["information","createWall","breakWall"]
-var modeNumber = 0;
-var mouseMode = mouseModes[modeNumber];
-var modeChanging = false;
-document.onkeydown = keyDown;
-
-
-// 現在選択しているセルのIDを記録する
-var select = null;
-
-/* イベントの登録 */
 function keyDown(e){
     modeChanging = true;
     
@@ -37,31 +9,27 @@ function keyDown(e){
     }
     modeNumber = modeNumber%3;
     mouseMode = mouseModes[modeNumber];
+    InfoManager.mode = mouseMode;
 }
 
-function onDown(e){    
-    // クリックした位置のオブジェクトのIDをselectに代入して
-    // drawScreen()に処理を任せる
+function onDown(e){
+    var allObjects = [Plant.list,Resource.list,Animal.list,Predator.list,Wall.list];
     var mousePoint = new Point(cellLeft,cellTop);
-    var objID = null;
-    var inObject = function(objects){
-        for(obj of objects){
-            var objPoint = new Point(obj.x,obj.y);
-            if(objPoint.eq(mousePoint)){
-                return obj.id;
-            }
-        }
-        return null;
-    }
     
-    // information の場合、オブジェクトの情報を表示
+    // information の場合オブジェクトをInfoManagerに登録
     if(modeNumber == 0){
-        for(objects of allObjects){
-            objID = inObject(objects);
-            if(objID != null){
-                select = objID;
-                break;
+        // クリックしたオブジェクトを取得
+        var clickedObj = function(){
+            for(objects of allObjects){
+                for(obj of objects){
+                    if(obj.point.eq(mousePoint))　return obj;
+                }
             }
+            return null;
+        }();
+        // InfoManagerに登録
+        if(clickedObj != null && clickedObj.id != null){
+            InfoManager.clickedObj = clickedObj;
         }
     }
     
@@ -104,7 +72,7 @@ function onDown(e){
                         }
                     }
                 }
-                createWall(cellLeft,cellTop);
+                Wall.create(cellLeft,cellTop);
                 //console.log(walls);
 
                 // クリックを終えたとき、処理を終了
@@ -152,7 +120,7 @@ function onDown(e){
             for(var i=0;i<Wall.list.length;i++){
                 if(mousePoint.eq(Wall.list[i])){
                     Wall.list.splice(i,1);
-                    remainingWalls = wall_count - Wall.list.length;
+                    InfoManager.remainingWalls = wall_count - Wall.list.length;
                     
                     // gameRoutineに依存せず即座に描画
                     context.fillStyle ="rgb(100,100,100)";
@@ -207,6 +175,7 @@ function eventRegister(){
         eventRegisterは簡潔さを保つためにイベントを登録するだけの機能にする
         具体的な処理は原則的にすべてeventListenerに登録した関数内に記述する
     */
+    document.onkeydown = keyDown;
     canvas.addEventListener('mousedown', onDown, false);
     canvas.addEventListener('mouseup', onUp, false);
     canvas.addEventListener('click', onClick, false);
