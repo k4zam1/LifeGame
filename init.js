@@ -4,7 +4,6 @@ var context = canvas.getContext("2d");
 var cellSize = 10;
 var day = 0;
 
-
 // マウスの位置情報を記録する変数
 var mouseX = 0;
 var mouseY = 0;

@@ -2,7 +2,7 @@
 /* Animal関連のグローバル変数 */
 var animals = [];       // すべての動物が記録される変数(記録配列)
 var predators = [];     // すべての捕食者が記録されている変数(記録配列)
-
+var tank = 0;           // 資源の総量
 
 
 // オブジェクトにIDを振ってくれるアロケーター
@@ -102,6 +102,13 @@ class Animal {
                 this.energy += 10;
                 // i番目の植物を削除して詰める
                 plants.splice(i,1);
+                break;
+            }
+        }
+        for(var i=0;i<resources.length;i++){
+            if(animalPoint.eq(resources[i].point)){
+                tank += 1;
+                resources.splice(i,1);
                 break;
             }
         }
