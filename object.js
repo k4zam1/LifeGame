@@ -1,9 +1,3 @@
-import Point from 'utility.js';
-
-/* グローバル変数 */
-var tank = 0;           // 資源の総量
-
-
 // オブジェクトにIDを振ってくれるアロケーター
 // クリックするオブジェクトにはこれでIDを割り振ること
 class IDAllocator {
@@ -165,6 +159,7 @@ class Organism extends GameObject {
 }
 
 // 動物
+var tank = 0;           // 資源の総量
 class Animal extends Organism {
     eat(){
         var edibles = [Plant,Resource];

@@ -1,3 +1,4 @@
+var objectClasses = [Plant,Resource,Animal,Predator,Wall];
 function main(){
     var player = null;
 
@@ -14,19 +15,24 @@ function main(){
     }
     console.log("you select :",player);
 
-    // draw test(あとで消すこと)
+    // Animal initialize
     var adam_genes = [1,0,1,0,1,0,1,0];
     var adam = new Animal(50,50,80,0,adam_genes);
-    animals.push(adam);
+    Animal.list = [];
+    Animal.list.push(adam);
+    Animal.edibles = [Plant,Resource];
 
+    // Predator initialize
     var predator_genes = [1,1,2,1,1,1,1,0]
     var adam_predator = new Predator(60,80,80,0,predator_genes);
-    predators.push(adam_predator);
-    // draw test　ここまで
+    Predator.list = [];
+    Predator.list.push(adam_predator);
 
-    // initialize
-    canvas.height = 480;
-    canvas.width = 640;
+    // Canvas initialize
+    canvas.height = heightSize;
+    canvas.width = widthSize;
+
+    var finish = 10000;
     eventRegister();
     
     // 1秒間隔で一日を経過させる
@@ -34,10 +40,10 @@ function main(){
         var gameDay = gameRoutine();
 
         // 1000日経過で終了
-        if(gameDay >= 1000){
+        if(gameDay >= finish){
             clearInterval(intervalID);
             var winner;
-            if(animals.length >= predators.length){
+            if(Animal.list.length >= Predator.list.length){
                 winner = "Animal";
             }
             else {
@@ -56,31 +62,24 @@ function main(){
 
 // 一日に一回行われる関数
 // 環境のアップデート・描画のすべてを集約している
-var allObjects = null;
 function gameRoutine(){
     ++day;
 
     // objectの更新
-    add_plant();
-    add_resource(canvas.width,canvas.height,cellSize);
-    predators = updateCreatures(predators);
-    animals = updateCreatures(animals);
-    allObjects = [plants,animals,predators,resources,walls];
-
-    // draw
-    drawScreen();
-    return day
-}
+    for(cls of objectClasses){
+        if(typeof cls.update == "function"){
+            cls.update();
+        }
+    }
 
 
-// すべての描画を行う関数
-function drawScreen(){
+    // 以下、描画処理
     // fresh screen
     context.clearRect(0,0,canvas.width,canvas.height);
 
     // 全オブジェクトの描画
-    for(obj of allObjects){
-        drawObject(obj);
+    for(cls of objectClasses){
+        cls.draw();
     }
 
     // 縦線
@@ -117,8 +116,8 @@ function drawScreen(){
     // 選択している個体の情報を表示
     if(select != null){
         var notFoundSelectedObject = true;
-        for(objects of allObjects){
-            for(obj of objects){
+        for(objects of objectClasses){
+            for(obj of objects.list){
                 if(select == obj.id){
                     var text = dayInformation
                         + "<p>mode:"+mouseMode+"<br/>"
@@ -151,13 +150,6 @@ function drawScreen(){
             + "<P>remaining walls:"+remainingWalls+"</p>";
         textBox.innerHTML = text;
     }
-}
 
-// 描画するオブジェクトの集合drawObjectが与えられると
-// そのなかのすべてを描画する関数
-function drawObject(drawObject){
-    for(obj of drawObject){
-        context.fillStyle = obj.color;
-        context.fillRect(obj.x,obj.y,cellSize,cellSize);
-    }
+    return day
 }

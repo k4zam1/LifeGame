@@ -2,6 +2,8 @@
 var canvas = document.getElementById("canvas");
 var context = canvas.getContext("2d");
 var cellSize = 10;
+var widthSize = 640;
+var heightSize = 480;
 var day = 0;
 
 // マウスの位置情報を記録する変数
@@ -35,7 +37,6 @@ function keyDown(e){
     }
     modeNumber = modeNumber%3;
     mouseMode = mouseModes[modeNumber];
-    //console.log(mouseMode);
 }
 
 function onDown(e){    
@@ -67,7 +68,7 @@ function onDown(e){
     
     // createWall の場合、壁を生成
     if(modeNumber == 1){
-        if(walls.length >= wall_count){
+        if(Wall.list.length >= wall_count){
             //ブブーなどのサウンドを鳴らしてみるか検討中
             
         } else {
@@ -85,7 +86,7 @@ function onDown(e){
                 }
 
                 // 壁の数が上限に達した場合、処理を終了
-                else if(walls.length >= wall_count){
+                else if(Wall.list.length >= wall_count){
                     clearInterval(intervalID2);
                     //サウンドの検討
                 }
@@ -148,10 +149,10 @@ function onDown(e){
             
             
             // 壁オブジェクトがあった場合、それを削除する
-            for(var i=0;i<walls.length;i++){
-                if(mousePoint.eq(walls[i])){
-                    walls.splice(i,1);
-                    remainingWalls = wall_count - walls.length;
+            for(var i=0;i<Wall.list.length;i++){
+                if(mousePoint.eq(Wall.list[i])){
+                    Wall.list.splice(i,1);
+                    remainingWalls = wall_count - Wall.list.length;
                     
                     // gameRoutineに依存せず即座に描画
                     context.fillStyle ="rgb(100,100,100)";
@@ -213,41 +214,4 @@ function eventRegister(){
     canvas.addEventListener('mouseout', onOut, false);
     canvas.addEventListener('mousemove',onMove,false);
   
-}
-
-
-// animal,plant共通
-class Point {
-    constructor(x,y){
-        this.x = x;
-        this.y = y;
-    }
-    eq(point){
-        if(this.x == point.x && this.y == point.y){
-            return true;
-        }
-        return false;
-    }
-    set(x,y){
-        this.x = x;
-        this.y = y;
-    }
-}
-function sum(arr){
-    var s = 0;
-    arr.forEach(function(elm){
-        s += elm;
-    });
-    return s;
-}
-function getRandomInt(min,max){
-    var rand = Math.floor(Math.random()*(max+1-min))+min;
-    return rand;
-}
-function deepCopyArray(sourceArray){
-    var newArray = [];
-    for(s of sourceArray){
-        newArray.push(s);
-    }
-    return newArray;
 }
