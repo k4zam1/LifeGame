@@ -4,13 +4,18 @@
  * common variables
  *-------------------------------------------------------*/
 
-var TEXTBOX = document.getElementById("informationBox");
+ // 描画
+var TEXTBOX = document.getElementById("info");
 var canvas = document.getElementById("canvas");
 var context = canvas.getContext("2d");
+var bgCanvas = document.getElementById("background");
+var bgContext = bgCanvas.getContext("2d");
 var cellSize = 10;      // セルの一辺のサイズ
-var finish = 1000;      // 何dayで終わるか
+var PLAYER = null;
+var FINISH = 1000;      // 何dayで終わるか
 canvas.height = 480;    // canvasのwidth
 canvas.width = 640;     // canvasのheight
+
 
 // 情報ボックスで表示する変数はInfoManagerに登録する
 class InfoManager {}
@@ -18,6 +23,14 @@ InfoManager.day = 0;
 InfoManager.tank = 0;
 InfoManager.mode = "information";
 InfoManager.clickedObj = null;
+InfoManager.gameSpeed = 100;
+
+
+// ゲーム速度
+var SPEED_SLIDER = document.getElementById("gameSpeedSlider");
+var changeSpeed = function(speed){
+    InfoManager.gameSpeed = 1000 - speed;
+}
 
 
 // マウスの位置情報を記録する変数
@@ -97,7 +110,9 @@ class Point {
     static getRandomPointIn(areas){
         var points = [];
         for(var i = 0; i < areas.length; i++){
-            var p = new Point(Math.floor(Math.random()*areas[i].range + areas[i].AreaX)*cellSize,Math.floor(Math.random()*areas[i].range + areas[i].AreaY)*cellSize);
+            var p = new Point(
+                Math.floor(Math.random()*areas[i].range + areas[i].AreaX)*cellSize,
+                Math.floor(Math.random()*areas[i].range + areas[i].AreaY)*cellSize);
             points.push(p);
         }
         return points;
@@ -143,11 +158,12 @@ class GameObject {
     static draw(){
         context.fillStyle = this.color;
         for(var obj of this.list){
-            context.fillRect(obj.x,obj.y,cellSize,cellSize);
+            context.fillRect(obj.x+1,obj.y+1,cellSize-2,cellSize-2);
         }
     }
 }
-GameObject.color = "rgb(255,255,255)";
+GameObject.list = [];
+GameObject.color = "rgb(0,0,0)";
 
 class Organism extends GameObject {
     constructor(x,y,energy,direction,genes){
@@ -247,6 +263,32 @@ class Organism extends GameObject {
         return child;
     }
 
+    static getRandomGene(){
+        var geneLength = 8;
+        var genes = [];
+        for(var i=0;i<geneLength;i++){
+            genes.push(getRandomInt(0,1));
+        }
+    }
+
+    static init(){
+        // ランダムな遺伝子を作成
+        var geneLength = 8;
+        var genes = [];
+        for(var i=0;i<geneLength;i++){
+            genes.push(getRandomInt(0,1));
+        }
+
+        // ランダムなプロパティを作成
+        var respawn = Point.getRandomPoint();
+        var energy = getRandomInt(100,200);
+        var dir = getRandomInt(0,7);
+
+        // オブジェクト生成
+        var adam = new this(respawn.x,respawn.y,energy,dir,genes);
+        this.list.push(adam);
+    }
+
     static update(){
         // 更新
         var newCreatures = []
@@ -285,7 +327,7 @@ class InnerHTMLGenerator {
             "day":InfoManager.day,
             "mode":InfoManager.mode,
             "tank":InfoManager.tank,
-            "remaining walls":InfoManager.remainingWalls,
+            "remaining_walls":InfoManager.remainingWalls,
             "id":null,
             "type":null,
             "x":null,
@@ -309,4 +351,12 @@ class InnerHTMLGenerator {
         text += "</p>";
         return text;
     }
+    update(){
+        this.info.day = InfoManager.day;
+        this.info.mode = InfoManager.mode;
+        this.info.tank = InfoManager.tank;
+        this.info.remaining_walls = InfoManager.remainingWalls;
+        this.clickedObj = InfoManager.clickedObj;
+    }
 }
+var innerHTMLGenerator = new InnerHTMLGenerator();

@@ -1,18 +1,34 @@
 function main(){
     // 種族の選択をチェック
-    var player = null;
     var species = document.getElementById("species");
     var radioNodeList = species.name;
     for(var i=0;i<radioNodeList.length;i++){
         if(radioNodeList[i].checked){
-            player = radioNodeList[i].value;
+            PLAYER = radioNodeList[i].value;
         } 
     }
-    if(player === null){
+    if(PLAYER === null){
         console.log("モードを選択してください");
         return;
     }
-    console.log("you select :",player);
+    console.log("you select :",PLAYER);
+
+
+    // 背景描画
+    var m = Math.max(canvas.width,canvas.height);
+    bgContext.strokeStyle ="rgb(0,0,0)";
+    bgContext.beginPath();
+    for(var i=0;i<=m;i+=cellSize){
+        // 横線
+        bgContext.moveTo(i,0);
+        bgContext.lineTo(i,canvas.height);
+
+        // 縦線
+        bgContext.moveTo(0,i);
+        bgContext.lineTo(canvas.width,i);
+    }
+    bgContext.closePath();
+    bgContext.stroke();
 
 
 
@@ -22,80 +38,53 @@ function main(){
             cls.init();
         }
     }
+
     // eventの初期化
     eventRegister();
     
 
-
     // 1秒間隔で一日を経過させる
-    var intervalID = setInterval(function(){
-        var gameDay = gameRoutine();
-
-        // finish日経過で終了
-        if(gameDay >= finish){
-            clearInterval(intervalID);
-            var winner = (Animal.list.length >= Predator.list.length) ? "Animal" : "Predator";
-            console.log((player == winner) ? "YOU WIN" : "YOU LOSE")
-        }
-    },30); 
+    gameLoop(InfoManager.gameSpeed);
 }
 
-// 一日に一回行われる関数
-// 環境のアップデート・描画のすべてを集約している
-function gameRoutine(){
-    //++day;
-    InfoManager.day += 1;
 
-    // objectの更新
-    for(cls of objectClasses){
-        if(typeof cls.update == "function"){
-            cls.update();
+
+function gameLoop(gameSpeed){
+    // 以下の内容をループする
+    var intervalID = setInterval(function(){
+        InfoManager.day += 1;
+        
+        // 描画
+        context.clearRect(0,0,canvas.width,canvas.height);
+        for(cls of objectClasses){
+            if(typeof cls.update == "function"){
+                cls.update();
+            }
+            cls.draw();
         }
-    }
+    
+        // 情報を描画する
+        innerHTMLGenerator.update();
+        TEXTBOX.innerHTML = innerHTMLGenerator.generate();
+    
+        // クリックされてるオブジェクトをハイライト
+        if(InfoManager.clickedObj != null){
+            context.fillStyle = "rgb(200,200,0)";
+            context.fillRect(InfoManager.clickedObj.x,InfoManager.clickedObj.y,cellSize,cellSize);
+        }
 
-    // 以下、描画処理
-    context.clearRect(0,0,canvas.width,canvas.height);
+        // ゲーム終了
+        if(InfoManager.day >= FINISH){
+            var winner = (Animal.list.length >= Predator.list.length) ? "Animal" : "Predator";
+            console.log((PLAYER == winner) ? "YOU WIN" : "YOU LOSE");
+            clearInterval(intervalID);
+        }
 
-    // 全オブジェクトの描画
-    for(cls of objectClasses){
-        cls.draw();
-    }
-
-    // 縦線
-    for(var i=0;i<=canvas.width;i+=cellSize){
-        context.strokeStyle ="rgb(0,0,0)";
-        context.beginPath();
-        context.moveTo(i,0);
-        context.lineTo(i,canvas.height);
-        context.closePath();
-        context.stroke();
-    }
-    // 横線
-    for(var i=0;i<=canvas.height;i+=cellSize){
-        context.strokeStyle ="rgb(0,0,0)";
-        context.beginPath();
-        context.moveTo(0,i);
-        context.lineTo(canvas.width,i);
-        context.closePath();
-        context.stroke();
-    }
-
-    // ハイライト
-    if(!mouseout){
-        context.strokeStyle ="rgb(250,250,0)";
-        context.strokeRect(cellLeft,cellTop,cellSize,cellSize);
-    }
-
-
-    // 情報を描画する
-    var innerHTMLGenerator = new InnerHTMLGenerator();
-    TEXTBOX.innerHTML = innerHTMLGenerator.generate();
-
-    // クリックしたオブジェクトをハイライト
-    if(InfoManager.clickedObj != null){
-        context.fillStyle = "rgb(200,200,0)";
-        context.fillRect(InfoManager.clickedObj.x,InfoManager.clickedObj.y,cellSize,cellSize);
-    }
-
-    return InfoManager.day;
+        // 速度が変わった場合再読み込み
+        if(gameSpeed != InfoManager.gameSpeed){
+            clearInterval(intervalID);
+            gameLoop(InfoManager.gameSpeed);
+            
+        }
+    },gameSpeed);
 }

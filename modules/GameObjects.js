@@ -23,7 +23,6 @@ class Wall extends GameObject {
     }
 }
 Wall.list = [];
-Wall.color = "rgb(0,0,0)"
 
 
 
@@ -53,6 +52,10 @@ var plantAreas_count = 10;      // 繁殖エリアの数
 var plants_count = 100;         // キャンパス内に存在できる植物の数
 
 class Plant extends GameObject {
+    constructor(x,y,energy){
+        super(x,y);
+        this.energy = 1;
+    }
     static init(){
         // 繁殖エリアを配列plantAreasに追加
         for(var i = 0; i < plantAreas_count; i++){
@@ -68,7 +71,6 @@ class Plant extends GameObject {
         }
     }
 }
-Plant.list = [];
 Plant.color = "rgb(0,200,0)";
 
 
@@ -77,50 +79,41 @@ Plant.color = "rgb(0,200,0)";
  *  Animal,Predator
  *---------------------------------------------------------------------------------------*/
 class Animal extends Organism {
-    static init(){
-        var adam_genes = [1,0,1,0,1,0,1,0];
-        var adam = new Animal(300,300,80,0,adam_genes);
-        Animal.list.push(adam);
-    }
-
-    eat(){
-        var edibles = [Plant,Resource];
-        var energyInc = 10;
-        var callback = function(ateClassName,objClass,index){
-            // クリックしていたオブジェクトを消すときはclickedObjをnullに戻す
-            if(InfoManager.clickedObj != null && InfoManager.clickedObj.id == objClass.list[index].id) InfoManager.clickedObj = null;
-            objClass.list.splice(index,1);
-            if(objClass == Resource) InfoManager.tank += 1;
-        };
-        super.eat(edibles,energyInc,callback);
-    }
+    eat(){ super.eat(__ANIMAL_EDIBLES,__ANIMAL_ENERGY_INC,__ANIMAL_EAT_CALLBACK); }
 }
+// Local Variables
+var __ANIMAL_EDIBLES = [Plant,Resource];
+var __ANIMAL_ENERGY_INC = 10;
+var __ANIMAL_EAT_CALLBACK = function(ateClassName,objClass,index){
+    // クリックしていたオブジェクトを消すときはclickedObjをnullに戻す
+    if(InfoManager.clickedObj != null && InfoManager.clickedObj.id == objClass.list[index].id) InfoManager.clickedObj = null;
+    // オブジェクトがResourceならタンクを増やす
+    if(objClass == Resource) InfoManager.tank += 1;
+    objClass.list.splice(index,1);
+};
+// Settings
 Animal.list = [];
 Animal.color = "rgb(200,0,0)";        // 描画に利用する色
 Animal.reproduction_energy = 10;      // 子孫を残すのに必要なエネルギー
-Animal.reproduction_interval = 3;     // 子孫を何日ごとに残すか
+Animal.reproduction_interval = 5;     // 子孫を何日ごとに残すか
+
 
 class Predator extends Organism {
-    static init(){
-        var adam_genes = [1,1,0,1,1,1,1,0]
-        var adam = new Predator(250,300,80,0,adam_genes);
-        Predator.list.push(adam);
-    }
-    eat(){
-        var edibles = [Animal,Predator];
-        var energyInc = 7;
-        var callback = function(ateClassName,objClass,index){
-            // クリックしていたオブジェクトを消すときはclickedObjをnullに戻す
-            if(InfoManager.clickedObj != null && InfoManager.clickedObj.id == objClass.list[index].id) InfoManager.clickedObj = null;
-            objClass.list.splice(index,1);
-        };
-        super.eat(edibles,energyInc,callback);
-    }
+    eat(){ super.eat(__PREDATOR_EDIBLES,__PREDATOR_ENERGY_INC,__PREDATOR_EAT_CALLBACK); }
 }
+// Local Variables
+var __PREDATOR_EDIBLES = [Animal,Predator];
+var __PREDATOR_ENERGY_INC = 7;
+var __PREDATOR_EAT_CALLBACK = function(ateClassName,objClass,index){
+    // クリックしていたオブジェクトを消すときはclickedObjをnullに戻す
+    if(InfoManager.clickedObj != null && InfoManager.clickedObj.id == objClass.list[index].id) InfoManager.clickedObj = null;
+    objClass.list.splice(index,1);
+};
+// Settings
 Predator.list = [];
 Predator.color = "rgb(0,0,200)"         // 描画に利用する色
 Predator.reproduction_energy = 20;      // 子孫を残すのに必要なエネルギー
-Predator.reproduction_interval = 9;     // 子孫を何日ごとに残すか
+Predator.reproduction_interval = 10;     // 子孫を何日ごとに残すか
 
 
 

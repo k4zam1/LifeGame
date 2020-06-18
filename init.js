@@ -166,7 +166,6 @@ function onMove(e){
     mouseY = e.offsetY;
     cellLeft = (Math.floor(mouseX/10))*10;
     cellTop = (Math.floor(mouseY/10))*10;
-  
 }
 
 
@@ -182,5 +181,4 @@ function eventRegister(){
     canvas.addEventListener('mouseover', onOver, false);
     canvas.addEventListener('mouseout', onOut, false);
     canvas.addEventListener('mousemove',onMove,false);
-  
 }
