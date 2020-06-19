@@ -16,10 +16,14 @@
             <div id="speed">
                 S <input id="gameSpeedSlider" type="range" name="speed" min="0" max="1000" oninput="changeSpeed(this.value)" > F
             </div>
+            <select id="item">
+                <option value="none">----</option>
+                <option value="breederReactor">増殖炉</option>
+            </select>
         </div>
     </div>
     <script src="modules/common.js"></script>
-    <script src="init.js"></script>
+    <script src="event.js"></script>
     <script src="modules/GameObjects.js"></script>
     <script src="main.js"></script>
     <br/>

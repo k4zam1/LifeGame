@@ -16,9 +16,39 @@ var FINISH = 1000;      // 何dayで終わるか
 canvas.height = 480;    // canvasのwidth
 canvas.width = 640;     // canvasのheight
 
+// マウスの位置情報を記録する変数
+var mouseX = 0;
+var mouseY = 0;
+var cellLeft = 0;
+var cellTop = 0;
+var mouseout = false;
+
+
+// マウスのモードを記録する変数
+var mouseModes = ["information","createWall","breakWall"]
+var modeNumber = 0;
+var mousePoint = null;
+var mouseMode = mouseModes[modeNumber];
+var modeChanging = false;
 
 // 情報ボックスで表示する変数はInfoManagerに登録する
-class InfoManager {}
+class InfoManager {
+    static registerClickedObject(mousePoint,objectsList){
+        // クリックしたオブジェクトを取得
+        var clickedObj = function(){
+            for(var objects of objectsList){
+                for(var obj of objects){
+                    if(obj.point.eq(mousePoint))　return obj;
+                }
+            }
+            return null;
+        }();
+        // InfoManagerに登録
+        if(clickedObj != null && clickedObj.id != null){
+            this.clickedObj = clickedObj;
+        }
+    }
+}
 InfoManager.day = 0;
 InfoManager.tank = 0;
 InfoManager.mode = "information";
@@ -33,19 +63,22 @@ var changeSpeed = function(speed){
 }
 
 
-// マウスの位置情報を記録する変数
-var mouseX = 0;
-var mouseY = 0;
-var cellLeft = 0;
-var cellTop = 0;
-var mouseout = false;
-
-
-// マウスのモードを記録する変数
-var mouseModes = ["information","createWall","breakWall"]
-var modeNumber = 0;
-var mouseMode = mouseModes[modeNumber];
-var modeChanging = false;
+// select
+var select = document.querySelector("#item");
+var options = document.querySelectorAll("#item option");
+select.addEventListener("change",function(){
+    // 選択されたoption番号を取得
+    var selectedItem = options[this.selectedIndex].value;
+    switch(selectedItem){
+        case "breederReactor":
+            if(InfoManager.tank < 100) break;
+            InfoManager.tank -= 100;
+            
+            break;
+        default : break;
+    }
+    this.selectedIndex = 0;
+});
 
 
 /*------------------------------------------------------
@@ -85,9 +118,7 @@ class Point {
         this.y = y;
     }
     eq(point){
-        if(this.x == point.x && this.y == point.y){
-            return true;
-        }
+        if(this.x == point.x && this.y == point.y) return true;
         return false;
     }
     set(x,y){
@@ -98,15 +129,18 @@ class Point {
     static getRandomWidth(){
         return getRandomInt(0,canvas.width/cellSize);
     }
+
     static getRandomHeight(){
         return getRandomInt(0,canvas.height/cellSize);
     }
+
     static getRandomPoint(){
         var w = this.getRandomWidth();
         var h = this.getRandomHeight();
         var p = new Point(w*cellSize,h*cellSize);
         return p;
     }
+
     static getRandomPointIn(areas){
         var points = [];
         for(var i = 0; i < areas.length; i++){
@@ -215,6 +249,8 @@ class Organism extends GameObject {
         // 情報の更新
         this.x = next.x;
         this.y = next.y;
+        this.point.x = next.x;
+        this.point.y = next.y;
         this.energy -= 1;
     }
 
@@ -233,14 +269,19 @@ class Organism extends GameObject {
         }
     }
 
-    eat(edibles,energyInc=10,callback){
+    eat(edibles,energyInc=10){
         var ate;
         for(var edible of edibles){
             for(var i=0;i<edible.list.length;i++){
                 if(this.point.eq(edible.list[i].point) && this.id != edible.list[i].id){
                     this.energy += energyInc;
-                    ate = edible.list[i].constructor.name;
-                    callback(ate,edible,i);
+
+                    // クリックしていたオブジェクトを消すときはclickedObjをnullに戻す
+                    if(InfoManager.clickedObj != null && InfoManager.clickedObj.id == edible.list[i].id) InfoManager.clickedObj = null;
+                    
+                    // オブジェクトがResourceならタンクを増やす
+                    if(edible == Resource) InfoManager.tank += 1;
+                    edible.list.splice(i,1);
                     break;
                 }
             }
@@ -360,3 +401,45 @@ class InnerHTMLGenerator {
     }
 }
 var innerHTMLGenerator = new InnerHTMLGenerator();
+
+
+class ScreenManager {
+    static drawBackground(){
+        var m = Math.max(canvas.width,canvas.height);
+        this.background.strokeStyle ="rgb(0,0,0)";
+        this.background.beginPath();
+        for(var i=0;i<=m;i+=cellSize){
+            // 横線
+            this.background.moveTo(i,0);
+            this.background.lineTo(i,canvas.height);
+    
+            // 縦線
+            this.background.moveTo(0,i);
+            this.background.lineTo(canvas.width,i);
+        }
+        this.background.closePath();
+        this.background.stroke();
+    }
+    static updateGameScreen(objClasses,){
+
+        // 描画
+        this.gameScreen.clearRect(0,0,canvas.width,canvas.height);
+        for(var cls of objClasses){
+            if(typeof cls.update == "function"){
+                cls.update();
+            }
+            cls.draw();
+        }
+        // 情報を描画する
+        innerHTMLGenerator.update();
+        TEXTBOX.innerHTML = innerHTMLGenerator.generate();
+    
+        // クリックされてるオブジェクトをハイライト
+        if(InfoManager.clickedObj != null){
+            this.gameScreen.fillStyle = "rgb(200,200,0)";
+            this.gameScreen.fillRect(InfoManager.clickedObj.x,InfoManager.clickedObj.y,cellSize,cellSize);
+        }
+    }
+}
+ScreenManager.gameScreen = context;
+ScreenManager.background = bgContext;

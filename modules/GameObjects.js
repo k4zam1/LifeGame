@@ -7,19 +7,38 @@ wall_count = 20;                            // キャンパス内に存在でき
 InfoManager.remainingWalls = wall_count;    // 設置できる残りの壁の数
 
 class Wall extends GameObject {
-    static create(x,y){
-        var block = new Wall(x,y);
-        Wall.list.push(block);
-        
-        if(Wall.list.length > wall_count){
-            Wall.list.shift();
+    static create(mouse,objectsList){
+        // オブジェクトがあった場合、それを削除する
+        for(var objects of objectsList){
+            for(var i=0;i<objects.length;i++){
+                if(mouse.eq(objects[i])){
+                    objects.splice(i,1);
+                    break;
+                }
+            }
         }
-        
+        var block = new Wall(mouse.x,mouse.y);
+        Wall.list.push(block);
         InfoManager.remainingWalls = wall_count - Wall.list.length;
         
         // gameRoutineに依存せず即座に描画
         context.fillStyle = this.color;
-        context.fillRect(x,y,cellSize,cellSize);
+        context.fillRect(mouse.x,mouse.y,cellSize,cellSize);
+    }
+    static delete(mouse){
+        for(var i=0;i<Wall.list.length;i++){
+            if(mouse.eq(Wall.list[i])){
+                Wall.list.splice(i,1);
+                InfoManager.remainingWalls = wall_count - Wall.list.length;
+                // gameRoutineに依存せず即座に描画
+                context.fillStyle ="rgb(100,100,100)";
+                context.fillRect(cellLeft,cellTop,cellSize,cellSize);
+                break;
+            }
+        }
+    }
+    static isLimit(){
+        return (Wall.list.length >= wall_count);
     }
 }
 Wall.list = [];
@@ -64,6 +83,7 @@ class Plant extends GameObject {
     }
     static update(){
         // 各繁殖エリア内で植物をランダムに作成
+        //if(Plant.list.length >= plants_count) return;
         var points = Point.getRandomPointIn(plantAreas);
         for(var p of points){
             var plant = new Plant(p.x,p.y);
@@ -71,6 +91,7 @@ class Plant extends GameObject {
         }
     }
 }
+Plant.list = [];
 Plant.color = "rgb(0,200,0)";
 
 
@@ -79,18 +100,12 @@ Plant.color = "rgb(0,200,0)";
  *  Animal,Predator
  *---------------------------------------------------------------------------------------*/
 class Animal extends Organism {
-    eat(){ super.eat(__ANIMAL_EDIBLES,__ANIMAL_ENERGY_INC,__ANIMAL_EAT_CALLBACK); }
+    eat(){ super.eat(__ANIMAL_EDIBLES,__ANIMAL_ENERGY_INC); }
 }
 // Local Variables
 var __ANIMAL_EDIBLES = [Plant,Resource];
 var __ANIMAL_ENERGY_INC = 10;
-var __ANIMAL_EAT_CALLBACK = function(ateClassName,objClass,index){
-    // クリックしていたオブジェクトを消すときはclickedObjをnullに戻す
-    if(InfoManager.clickedObj != null && InfoManager.clickedObj.id == objClass.list[index].id) InfoManager.clickedObj = null;
-    // オブジェクトがResourceならタンクを増やす
-    if(objClass == Resource) InfoManager.tank += 1;
-    objClass.list.splice(index,1);
-};
+
 // Settings
 Animal.list = [];
 Animal.color = "rgb(200,0,0)";        // 描画に利用する色
@@ -99,16 +114,12 @@ Animal.reproduction_interval = 5;     // 子孫を何日ごとに残すか
 
 
 class Predator extends Organism {
-    eat(){ super.eat(__PREDATOR_EDIBLES,__PREDATOR_ENERGY_INC,__PREDATOR_EAT_CALLBACK); }
+    eat(){ super.eat(__PREDATOR_EDIBLES,__PREDATOR_ENERGY_INC); }
 }
 // Local Variables
 var __PREDATOR_EDIBLES = [Animal,Predator];
 var __PREDATOR_ENERGY_INC = 7;
-var __PREDATOR_EAT_CALLBACK = function(ateClassName,objClass,index){
-    // クリックしていたオブジェクトを消すときはclickedObjをnullに戻す
-    if(InfoManager.clickedObj != null && InfoManager.clickedObj.id == objClass.list[index].id) InfoManager.clickedObj = null;
-    objClass.list.splice(index,1);
-};
+
 // Settings
 Predator.list = [];
 Predator.color = "rgb(0,0,200)"         // 描画に利用する色
@@ -118,4 +129,11 @@ Predator.reproduction_interval = 10;     // 子孫を何日ごとに残すか
 
 
 //! すべてのオブジェクトクラスを登録しておく
-var objectClasses = [Plant,Resource,Animal,Predator,Wall];
+var objectClasses = [Wall,Animal,Predator,Plant,Resource];
+
+// 各クラスの初期化
+for(cls of objectClasses){
+    if(typeof cls.init == "function"){
+        cls.init();
+    }
+}
