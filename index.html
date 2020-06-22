@@ -12,6 +12,9 @@
                     <input name="name" type="radio" value="Animal" checked="checked"> Animal　
                     <input name="name" type="radio" value="Predator"> Predator
                 </form>
+                <form id="stageSelect">
+                    <input name="stageFile" type="file"/>
+                </form>
             </div>
             <div id="speed">
                 S <input id="gameSpeedSlider" type="range" name="speed" min="0" max="1000" oninput="changeSpeed(this.value)" > F
@@ -25,6 +28,8 @@
     <script src="modules/common.js"></script>
     <script src="event.js"></script>
     <script src="modules/GameObjects.js"></script>
+    <script src="modules/GameItems.js"></script>
+    <script src="stage.js"></script>
     <script src="main.js"></script>
     <br/>
     <input type="button" value="Start" onclick="main();"/>

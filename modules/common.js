@@ -8,11 +8,13 @@
 var TEXTBOX = document.getElementById("info");
 var canvas = document.getElementById("canvas");
 var context = canvas.getContext("2d");
+var map = document.getElementById("stageSelect");
 var bgCanvas = document.getElementById("background");
 var bgContext = bgCanvas.getContext("2d");
 var cellSize = 10;      // セルの一辺のサイズ
 var PLAYER = null;
 var FINISH = 1000;      // 何dayで終わるか
+var stageLayout = [];   // 二次元配列を入れるための配列
 canvas.height = 480;    // canvasのwidth
 canvas.width = 640;     // canvasのheight
 
@@ -61,24 +63,6 @@ var SPEED_SLIDER = document.getElementById("gameSpeedSlider");
 var changeSpeed = function(speed){
     InfoManager.gameSpeed = 1000 - speed;
 }
-
-
-// select
-var select = document.querySelector("#item");
-var options = document.querySelectorAll("#item option");
-select.addEventListener("change",function(){
-    // 選択されたoption番号を取得
-    var selectedItem = options[this.selectedIndex].value;
-    switch(selectedItem){
-        case "breederReactor":
-            if(InfoManager.tank < 100) break;
-            InfoManager.tank -= 100;
-            
-            break;
-        default : break;
-    }
-    this.selectedIndex = 0;
-});
 
 
 /*------------------------------------------------------
@@ -242,6 +226,11 @@ class Organism extends GameObject {
         // オブジェクトの判定
         for(var wall of Wall.list){
             if(wall.point.eq(next)){
+                return;
+            }
+        }
+        for(var br of BreederReactor.list){
+            if(br.point.eq(next)){
                 return;
             }
         }

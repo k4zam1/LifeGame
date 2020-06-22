@@ -125,15 +125,3 @@ Predator.list = [];
 Predator.color = "rgb(0,0,200)"         // 描画に利用する色
 Predator.reproduction_energy = 20;      // 子孫を残すのに必要なエネルギー
 Predator.reproduction_interval = 10;     // 子孫を何日ごとに残すか
-
-
-
-//! すべてのオブジェクトクラスを登録しておく
-var objectClasses = [Wall,Animal,Predator,Plant,Resource];
-
-// 各クラスの初期化
-for(cls of objectClasses){
-    if(typeof cls.init == "function"){
-        cls.init();
-    }
-}
