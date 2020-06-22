@@ -1,6 +1,6 @@
 // ステージの追加
 map.stageFile.addEventListener("change", function(e) {
-
+    console.log("called");
     var result = e.target.files[0];
 
     //FileReaderのインスタンスを作成する

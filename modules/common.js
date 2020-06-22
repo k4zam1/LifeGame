@@ -4,7 +4,7 @@
  * common variables
  *-------------------------------------------------------*/
 
- // 描画
+// 描画
 var TEXTBOX = document.getElementById("info");
 var canvas = document.getElementById("canvas");
 var context = canvas.getContext("2d");
