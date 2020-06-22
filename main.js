@@ -1,44 +1,36 @@
 function main(){
-    ScreenManager.drawBackground();
-    
-    // 種族の選択をチェック
-    var species = document.getElementById("species");
-    var radioNodeList = species.name;
-    for(var i=0;i<radioNodeList.length;i++){
-        if(radioNodeList[i].checked){
-            PLAYER = radioNodeList[i].value;
-            console.log("you select :",PLAYER);
-            break;
-        } 
+    try {
+        InfoManager.init();
+        InfoManager.setPlayer();
+        createStage();
+        gameLoop();
     }
-    if(PLAYER === null){
-        console.log("モードを選択してください");
+    catch(e){
+        console.error(e);
         return;
     }
-
-    // ステージの初期化
-    createStage();
-    gameLoop(InfoManager.gameSpeed);
 }
 
-
-
-function gameLoop(gameSpeed){
+function gameLoop(gameSpeed=InfoManager.gameSpeed){
     // 以下の内容をループする
-    var intervalID = setInterval(function(){
-        InfoManager.day += 1;
-        ScreenManager.updateGameScreen(objectClasses);
+    ScreenManager.IID = setInterval(function(){
+        ScreenManager.clear();
+        // 各情報を更新して再描画する
+        InfoManager.update();
+        // 情報を描画する
+        innerHTMLGenerator.update();
+        TEXTBOX.innerHTML = innerHTMLGenerator.generate();
 
         // ゲーム終了
-        if(InfoManager.day >= FINISH){
+        if(InfoManager.day >= InfoManager.finish){
             var winner = (Animal.list.length >= Predator.list.length) ? "Animal" : "Predator";
-            console.log((PLAYER == winner) ? "YOU WIN" : "YOU LOSE");
-            clearInterval(intervalID);
+            ScreenManager.showFinishScreen(winner);
+            clearInterval(ScreenManager.IID);
         }
 
         // 速度が変わった場合再読み込み
         if(gameSpeed != InfoManager.gameSpeed){
-            clearInterval(intervalID);
+            clearInterval(ScreenManager.IID);
             gameLoop(InfoManager.gameSpeed);
         }
     },gameSpeed);
