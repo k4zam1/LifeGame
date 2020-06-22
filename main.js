@@ -14,8 +14,8 @@ function main(){
     }
     console.log("you select :",player);
 
-
-
+    
+    
     // 各クラスの初期化
     for(cls of objectClasses){
         if(typeof cls.init == "function"){
@@ -24,6 +24,9 @@ function main(){
     }
     // eventの初期化
     eventRegister();
+    
+    // ステージの初期化
+    createStage();
     
 
 
