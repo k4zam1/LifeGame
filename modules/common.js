@@ -7,13 +7,16 @@
  // 描画
 var TEXTBOX = document.getElementById("info");
 var canvas = document.getElementById("canvas");
+var map = document.getElementById("stageSelect");
 var context = canvas.getContext("2d");
 var map = document.getElementById("stageSelect");
 var bgCanvas = document.getElementById("background");
 var bgContext = bgCanvas.getContext("2d");
 var cellSize = 10;      // セルの一辺のサイズ
+
 var PLAYER = null;
 var FINISH = 1000;      // 何dayで終わるか
+
 var stageLayout = [];   // 二次元配列を入れるための配列
 canvas.height = 480;    // canvasのwidth
 canvas.width = 640;     // canvasのheight
@@ -381,6 +384,7 @@ class InnerHTMLGenerator {
         text += "</p>";
         return text;
     }
+
     update(){
         this.info.day = InfoManager.day;
         this.info.mode = InfoManager.mode;
@@ -432,3 +436,4 @@ class ScreenManager {
 }
 ScreenManager.gameScreen = context;
 ScreenManager.background = bgContext;
+

@@ -16,10 +16,12 @@ function main(){
         return;
     }
 
+
     // ステージの初期化
     createStage();
     gameLoop(InfoManager.gameSpeed);
 }
+
 
 
 
