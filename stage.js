@@ -24,12 +24,17 @@ map.stageFile.addEventListener("change", function(e) {
 
 
 function createStage(){
-    
+
+    var allObjects = [Plant.list,Resource.list,Animal.list,Predator.list,Wall.list];
+
     for(var i=0; i<stageLayout.length; i++){
         for(var j=0; j<stageLayout[i].length; j++){
             if(stageLayout[i][j] == 1){
                 wall_count += 1;
-                Wall.create(cellSize*j, cellSize*i);
+
+                var p = new Point(cellSize*j,cellSize*i);
+                Wall.create(p,allObjects);
+
             }      
         }
     }

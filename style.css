@@ -2,11 +2,32 @@ body {
     background: #666;
 }
 
-#canvas {
-    background: #777;
+#app {
+    width:840px;
+    height:480px;
 }
 
-div#informationBox {
+#background {
+    position:absolute;
+    top:10px;
+    left:10px; 
+    z-index: 0;
+    width:640px;
+    height:480px;
+    display: inline-block;
+}
+
+#canvas {
+    position:absolute;
+    top:10px;
+    left:10px;
+    z-index: 1;
+}
+
+#informationBox {
+    position: absolute;
+    top:10px;
+    left:650px;
     color:#FFF;
     padding : 20px ;
     border: solid 1px #000000;

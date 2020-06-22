@@ -4,23 +4,22 @@
  * common variables
  *-------------------------------------------------------*/
 
-var TEXTBOX = document.getElementById("informationBox");
+ // 描画
+var TEXTBOX = document.getElementById("info");
 var canvas = document.getElementById("canvas");
 var map = document.getElementById("stageSelect");
 var context = canvas.getContext("2d");
+var map = document.getElementById("stageSelect");
+var bgCanvas = document.getElementById("background");
+var bgContext = bgCanvas.getContext("2d");
 var cellSize = 10;      // セルの一辺のサイズ
-var finish = 1000;      // 何dayで終わるか
+
+var PLAYER = null;
+var FINISH = 1000;      // 何dayで終わるか
+
 var stageLayout = [];   // 二次元配列を入れるための配列
 canvas.height = 480;    // canvasのwidth
 canvas.width = 640;     // canvasのheight
-
-// 情報ボックスで表示する変数はInfoManagerに登録する
-class InfoManager {}
-InfoManager.day = 0;
-InfoManager.tank = 0;
-InfoManager.mode = "information";
-InfoManager.clickedObj = null;
-
 
 // マウスの位置情報を記録する変数
 var mouseX = 0;
@@ -33,8 +32,40 @@ var mouseout = false;
 // マウスのモードを記録する変数
 var mouseModes = ["information","createWall","breakWall"]
 var modeNumber = 0;
+var mousePoint = null;
 var mouseMode = mouseModes[modeNumber];
 var modeChanging = false;
+
+// 情報ボックスで表示する変数はInfoManagerに登録する
+class InfoManager {
+    static registerClickedObject(mousePoint,objectsList){
+        // クリックしたオブジェクトを取得
+        var clickedObj = function(){
+            for(var objects of objectsList){
+                for(var obj of objects){
+                    if(obj.point.eq(mousePoint))　return obj;
+                }
+            }
+            return null;
+        }();
+        // InfoManagerに登録
+        if(clickedObj != null && clickedObj.id != null){
+            this.clickedObj = clickedObj;
+        }
+    }
+}
+InfoManager.day = 0;
+InfoManager.tank = 0;
+InfoManager.mode = "information";
+InfoManager.clickedObj = null;
+InfoManager.gameSpeed = 100;
+
+
+// ゲーム速度
+var SPEED_SLIDER = document.getElementById("gameSpeedSlider");
+var changeSpeed = function(speed){
+    InfoManager.gameSpeed = 1000 - speed;
+}
 
 
 /*------------------------------------------------------
@@ -74,9 +105,7 @@ class Point {
         this.y = y;
     }
     eq(point){
-        if(this.x == point.x && this.y == point.y){
-            return true;
-        }
+        if(this.x == point.x && this.y == point.y) return true;
         return false;
     }
     set(x,y){
@@ -87,19 +116,24 @@ class Point {
     static getRandomWidth(){
         return getRandomInt(0,canvas.width/cellSize);
     }
+
     static getRandomHeight(){
         return getRandomInt(0,canvas.height/cellSize);
     }
+
     static getRandomPoint(){
         var w = this.getRandomWidth();
         var h = this.getRandomHeight();
         var p = new Point(w*cellSize,h*cellSize);
         return p;
     }
+
     static getRandomPointIn(areas){
         var points = [];
         for(var i = 0; i < areas.length; i++){
-            var p = new Point(Math.floor(Math.random()*areas[i].range + areas[i].AreaX)*cellSize,Math.floor(Math.random()*areas[i].range + areas[i].AreaY)*cellSize);
+            var p = new Point(
+                Math.floor(Math.random()*areas[i].range + areas[i].AreaX)*cellSize,
+                Math.floor(Math.random()*areas[i].range + areas[i].AreaY)*cellSize);
             points.push(p);
         }
         return points;
@@ -145,11 +179,12 @@ class GameObject {
     static draw(){
         context.fillStyle = this.color;
         for(var obj of this.list){
-            context.fillRect(obj.x,obj.y,cellSize,cellSize);
+            context.fillRect(obj.x+1,obj.y+1,cellSize-2,cellSize-2);
         }
     }
 }
-GameObject.color = "rgb(255,255,255)";
+GameObject.list = [];
+GameObject.color = "rgb(0,0,0)";
 
 class Organism extends GameObject {
     constructor(x,y,energy,direction,genes){
@@ -197,10 +232,17 @@ class Organism extends GameObject {
                 return;
             }
         }
+        for(var br of BreederReactor.list){
+            if(br.point.eq(next)){
+                return;
+            }
+        }
 
         // 情報の更新
         this.x = next.x;
         this.y = next.y;
+        this.point.x = next.x;
+        this.point.y = next.y;
         this.energy -= 1;
     }
 
@@ -219,14 +261,19 @@ class Organism extends GameObject {
         }
     }
 
-    eat(edibles,energyInc=10,callback){
+    eat(edibles,energyInc=10){
         var ate;
         for(var edible of edibles){
             for(var i=0;i<edible.list.length;i++){
                 if(this.point.eq(edible.list[i].point) && this.id != edible.list[i].id){
                     this.energy += energyInc;
-                    ate = edible.list[i].constructor.name;
-                    callback(ate,edible,i);
+
+                    // クリックしていたオブジェクトを消すときはclickedObjをnullに戻す
+                    if(InfoManager.clickedObj != null && InfoManager.clickedObj.id == edible.list[i].id) InfoManager.clickedObj = null;
+                    
+                    // オブジェクトがResourceならタンクを増やす
+                    if(edible == Resource) InfoManager.tank += 1;
+                    edible.list.splice(i,1);
                     break;
                 }
             }
@@ -247,6 +294,32 @@ class Organism extends GameObject {
 
         var child = new this.constructor(this.x,this.y,energy,this.dir,genes);
         return child;
+    }
+
+    static getRandomGene(){
+        var geneLength = 8;
+        var genes = [];
+        for(var i=0;i<geneLength;i++){
+            genes.push(getRandomInt(0,1));
+        }
+    }
+
+    static init(){
+        // ランダムな遺伝子を作成
+        var geneLength = 8;
+        var genes = [];
+        for(var i=0;i<geneLength;i++){
+            genes.push(getRandomInt(0,1));
+        }
+
+        // ランダムなプロパティを作成
+        var respawn = Point.getRandomPoint();
+        var energy = getRandomInt(100,200);
+        var dir = getRandomInt(0,7);
+
+        // オブジェクト生成
+        var adam = new this(respawn.x,respawn.y,energy,dir,genes);
+        this.list.push(adam);
     }
 
     static update(){
@@ -287,7 +360,7 @@ class InnerHTMLGenerator {
             "day":InfoManager.day,
             "mode":InfoManager.mode,
             "tank":InfoManager.tank,
-            "remaining walls":InfoManager.remainingWalls,
+            "remaining_walls":InfoManager.remainingWalls,
             "id":null,
             "type":null,
             "x":null,
@@ -311,4 +384,56 @@ class InnerHTMLGenerator {
         text += "</p>";
         return text;
     }
+
+    update(){
+        this.info.day = InfoManager.day;
+        this.info.mode = InfoManager.mode;
+        this.info.tank = InfoManager.tank;
+        this.info.remaining_walls = InfoManager.remainingWalls;
+        this.clickedObj = InfoManager.clickedObj;
+    }
 }
+var innerHTMLGenerator = new InnerHTMLGenerator();
+
+
+class ScreenManager {
+    static drawBackground(){
+        var m = Math.max(canvas.width,canvas.height);
+        this.background.strokeStyle ="rgb(0,0,0)";
+        this.background.beginPath();
+        for(var i=0;i<=m;i+=cellSize){
+            // 横線
+            this.background.moveTo(i,0);
+            this.background.lineTo(i,canvas.height);
+    
+            // 縦線
+            this.background.moveTo(0,i);
+            this.background.lineTo(canvas.width,i);
+        }
+        this.background.closePath();
+        this.background.stroke();
+    }
+    static updateGameScreen(objClasses,){
+
+        // 描画
+        this.gameScreen.clearRect(0,0,canvas.width,canvas.height);
+        for(var cls of objClasses){
+            if(typeof cls.update == "function"){
+                cls.update();
+            }
+            cls.draw();
+        }
+        // 情報を描画する
+        innerHTMLGenerator.update();
+        TEXTBOX.innerHTML = innerHTMLGenerator.generate();
+    
+        // クリックされてるオブジェクトをハイライト
+        if(InfoManager.clickedObj != null){
+            this.gameScreen.fillStyle = "rgb(200,200,0)";
+            this.gameScreen.fillRect(InfoManager.clickedObj.x,InfoManager.clickedObj.y,cellSize,cellSize);
+        }
+    }
+}
+ScreenManager.gameScreen = context;
+ScreenManager.background = bgContext;
+
