@@ -1,48 +1,43 @@
 
+// moleculesを使うものはここに書く
+
 
 /*---------------------------------------------------------------------------------------*
  *  Wall
  *---------------------------------------------------------------------------------------*/
-wall_count = 20;                            // キャンパス内に存在できる壁の数
-InfoManager.remainingWalls = wall_count;    // 設置できる残りの壁の数
+
 
 class Wall extends GameObject {
-    static create(mouse,objectsList){
+    static isLimit(){
+        return (Wall.list.length >= this.__wallCount);
+    }
+    static create(mouse){
         // オブジェクトがあった場合、それを削除する
-        for(var objects of objectsList){
-            for(var i=0;i<objects.length;i++){
-                if(mouse.eq(objects[i])){
-                    objects.splice(i,1);
-                    break;
-                }
-            }
+        for(var cls of InfoManager.classList){
+            var found = cls.list.findIndex(obj => obj.point.eq(mouse));
+            if(found != -1) cls.list.splice(found,1);
         }
-        var block = new Wall(mouse.x,mouse.y);
-        Wall.list.push(block);
-        InfoManager.remainingWalls = wall_count - Wall.list.length;
         
+        var newBlock = new Wall(mouse.x,mouse.y);
+        Wall.list.push(newBlock);
+
         // gameRoutineに依存せず即座に描画
-        context.fillStyle = this.color;
-        context.fillRect(mouse.x,mouse.y,cellSize,cellSize);
+        ScreenManager.draw(this.color,mouse);
+        InfoManager.remainingWalls = this.__wallCount - Wall.list.length;
     }
     static delete(mouse){
-        for(var i=0;i<Wall.list.length;i++){
-            if(mouse.eq(Wall.list[i])){
-                Wall.list.splice(i,1);
-                InfoManager.remainingWalls = wall_count - Wall.list.length;
-                // gameRoutineに依存せず即座に描画
-                context.fillStyle ="rgb(100,100,100)";
-                context.fillRect(cellLeft,cellTop,cellSize,cellSize);
-                break;
-            }
-        }
-    }
-    static isLimit(){
-        return (Wall.list.length >= wall_count);
+        var found = Wall.list.findIndex(wall => wall.point.eq(mouse));
+        if(found == -1) return;
+        
+        // ブロックを消す
+        ScreenManager.draw("rgb(100,100,100)",Wall.list[found]);
+        Wall.list.splice(found,1);
+        InfoManager.remainingWalls = this.__wallCount - Wall.list.length;
     }
 }
 Wall.list = [];
-
+Wall.__wallCount = 20;
+InfoManager.remainingWalls = Wall.__wallCount;
 
 
 /*---------------------------------------------------------------------------------------*
@@ -59,36 +54,76 @@ Resource.list = [];
 Resource.color = "rgb(250,165,0)";
 
 
+/*---------------------------------------------------------------------------------------*
+ *  BreederReactor
+ *---------------------------------------------------------------------------------------*/
+class BreederReactor  extends GameObject {
+    constructor(x,y){
+        super(x,y);
+        this.published = InfoManager.day;
+    }
+    static update(){
+        for(var BR of BreederReactor.list){
 
+            // 生物を増殖させる
+            var respawn = BR.point;
+            var clone = Animal.randomProduce(respawn);
+            Animal.list.push(clone);
+
+            // 期限が来たら壊す
+            if(InfoManager.day - BR.published >= BreederReactor.timeLimit){
+                var found = BreederReactor.list.findIndex(br => br.id == BR.id);
+                if(found != -1) BreederReactor.list.splice(found,1);
+            }
+        }
+    }
+}
+BreederReactor.list = [];
+BreederReactor.color = "rgb(240,90,240)";
+BreederReactor.timeLimit = 100;
+
+// select
+var select = document.querySelector("#item");
+var options = document.querySelectorAll("#item option");
+select.addEventListener("change",function(){
+    // 選択されたoption番号を取得
+    var selectedItem = options[this.selectedIndex].value;
+    switch(selectedItem){
+        case "breederReactor":
+            if(InfoManager.tank < 100) break;
+            InfoManager.tank -= 100;
+            var BR1 = new BreederReactor(50,50);
+            var BR2 = new BreederReactor(50+cellSize,50);
+            var BR3 = new BreederReactor(50,50+cellSize);
+            var BR4 = new BreederReactor(50+cellSize,50+cellSize);
+            BreederReactor.list.push(BR1);
+            BreederReactor.list.push(BR2);
+            BreederReactor.list.push(BR3);
+            BreederReactor.list.push(BR4);
+            break;
+        default : break;
+    }
+    this.selectedIndex = 0;
+});
 
 
 /*---------------------------------------------------------------------------------------*
  *  Plant
  *---------------------------------------------------------------------------------------*/
-var plantAreas = [];            // 植物が繁殖するエリア
-var plantUpdateFrequency = 100; // 植物が繁殖する確率
-var plantAreas_count = 10;      // 繁殖エリアの数
-var plants_count = 100;         // キャンパス内に存在できる植物の数
+var __plantAreas = [];            // 植物が繁殖するエリア
+var __plantAreasNum = 10;      // 繁殖エリアの数
 
 class Plant extends GameObject {
-    constructor(x,y,energy){
-        super(x,y);
-        this.energy = 1;
-    }
     static init(){
         // 繁殖エリアを配列plantAreasに追加
-        for(var i = 0; i < plantAreas_count; i++){
-            plantAreas.push(Area.getRandomArea());
+        for(var i = 0; i < __plantAreasNum; i++){
+            __plantAreas.push(Area.getRandomArea());
         }
     }
     static update(){
         // 各繁殖エリア内で植物をランダムに作成
-        //if(Plant.list.length >= plants_count) return;
-        var points = Point.getRandomPointIn(plantAreas);
-        for(var p of points){
-            var plant = new Plant(p.x,p.y);
-            this.list.push(plant);
-        }
+        var newPlantPoints = Point.getRandomPointIn(__plantAreas);
+        newPlantPoints.forEach(p => this.list.push(new Plant(p.x,p.y)));
     }
 }
 Plant.list = [];
@@ -118,10 +153,15 @@ class Predator extends Organism {
 }
 // Local Variables
 var __PREDATOR_EDIBLES = [Animal,Predator];
-var __PREDATOR_ENERGY_INC = 7;
+var __PREDATOR_ENERGY_INC = 10;
 
 // Settings
 Predator.list = [];
 Predator.color = "rgb(0,0,200)"         // 描画に利用する色
 Predator.reproduction_energy = 20;      // 子孫を残すのに必要なエネルギー
 Predator.reproduction_interval = 10;     // 子孫を何日ごとに残すか
+
+
+// クラスのリストをInfoManagerに登録
+InfoManager.obstacles = [Wall,BreederReactor];
+InfoManager.classList = [Animal,Predator,Plant,Resource,BreederReactor,Wall];

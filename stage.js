@@ -1,6 +1,5 @@
 // ステージの追加
 map.stageFile.addEventListener("change", function(e) {
-
     var result = e.target.files[0];
 
     //FileReaderのインスタンスを作成する
@@ -24,18 +23,13 @@ map.stageFile.addEventListener("change", function(e) {
 
 
 function createStage(){
-
-    var allObjects = [Plant.list,Resource.list,Animal.list,Predator.list,Wall.list];
-
     for(var i=0; i<stageLayout.length; i++){
         for(var j=0; j<stageLayout[i].length; j++){
             if(stageLayout[i][j] == 1){
-                wall_count += 1;
-
+                Wall.__wallCount += 1;
                 var p = new Point(cellSize*j,cellSize*i);
-                Wall.create(p,allObjects);
-
-            }      
+                Wall.create(p);
+            }
         }
     }
 }

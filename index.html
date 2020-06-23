@@ -5,7 +5,7 @@
 <body>
 
     <div id="app">
-        <canvas id="canvas" width="0" height="0"></canvas>
+        <canvas id="canvas" width="640" height="480"></canvas>
         <canvas id="background" width="640" height="480"></canvas>
         <div id="informationBox">
             <div id="info">
@@ -27,11 +27,18 @@
         </div>
 
     </div>
-    <script src="modules/common.js"></script>
-    <script src="event.js"></script>
+    <!-- atom,molecules -->
+    <script src="modules/atom.js"></script>
+    <script src="modules/molecules.js"></script>
+
+    <!-- organisms -->
     <script src="modules/GameObjects.js"></script>
-    <script src="modules/GameItems.js"></script>
+
+    <!-- template -->
+    <script src="event.js"></script>
     <script src="stage.js"></script>
+
+    <!-- pages -->
     <script src="main.js"></script>
     <script src="stage.js"></script>
     <br/>

@@ -13,10 +13,8 @@ function keyDown(e){
 }
 
 function onDown(e){
-    var allObjects = [Plant.list,Resource.list,Animal.list,Predator.list,Wall.list];
-    
     switch(modeNumber){
-        case 0: /*--: information */ InfoManager.registerClickedObject(mousePoint,allObjects);break;
+        case 0: /*--: information */ InfoManager.registerClickedObject(mousePoint);break;
         case 1:
         /*--: create */
             // 壁上限の場合
@@ -27,7 +25,7 @@ function onDown(e){
                     clearInterval(intervalID2);
                     modeChanging = (modeChanging) ? false : true;
                 }
-                Wall.create(mousePoint,allObjects);
+                Wall.create(mousePoint);
                 // クリックを終えたとき、処理を終了
                 canvas.onmouseup = function(e){ if(e.button == 0) clearInterval(intervalID2); }
             },20);
