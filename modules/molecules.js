@@ -179,7 +179,7 @@ class Organism extends GameObject {
             // クリックしていたオブジェクトを消すときはclickedObjをnullに戻す
             if(InfoManager.clickedObj != null && InfoManager.clickedObj.id == edible.list[found].id) InfoManager.clickedObj = null;
             // オブジェクトがResourceならタンクを増やす
-            if(edible == Resource) InfoManager.tank += 1;
+            InfoManager.tank += (edible == Resource) ? 1:0;
             edible.list.splice(found,1);
             break;
         }
@@ -199,7 +199,7 @@ class Organism extends GameObject {
     }
 
 
-    static randomProduce(respawn=Point.getRandomPoint()){
+    static randomSpawn(respawn=Point.getRandomPoint()){
         var geneLength = 8;
         var genes = new Array(geneLength).fill(0).map(x => x + getRandomInt(0,1));
         var energy = getRandomInt(100,200);
@@ -209,7 +209,7 @@ class Organism extends GameObject {
     }
 
     static init(){
-        var adam = this.randomProduce();
+        var adam = this.randomSpawn();
         this.list.push(adam);
     }
 
@@ -230,4 +230,3 @@ class Organism extends GameObject {
         childs.forEach(child => this.list.push(child));
     }
 }
-

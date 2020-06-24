@@ -66,8 +66,8 @@ class BreederReactor  extends GameObject {
         for(var BR of BreederReactor.list){
 
             // 生物を増殖させる
-            var respawn = BR.point;
-            var clone = Animal.randomProduce(respawn);
+            var spawnPoint = BR.point;
+            var clone = Animal.randomSpawn(spawnPoint);
             Animal.list.push(clone);
 
             // 期限が来たら壊す
