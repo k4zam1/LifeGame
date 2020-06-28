@@ -29,6 +29,12 @@ function createStage(){
                 Wall.__wallCount += 1;
                 var p = new Point(cellSize*j,cellSize*i);
                 Wall.create(p);
+            }else if(stageLayout[i][j] == 2){
+                var spwanAnimal = new Point(cellSize*j,cellSize*i);
+                Animal.list.push(Animal.randomProduce(spwanAnimal));
+            }else if(stageLayout[i][j] == 3){
+                var spwanPredator = new Point(cellSize*j,cellSize*i);
+                Predator.list.push(Predator.randomProduce(spwanPredator));
             }
         }
     }
