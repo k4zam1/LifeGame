@@ -199,7 +199,7 @@ class Organism extends GameObject {
     }
 
 
-    static randomProduce(respawn=Point.getRandomPoint()){
+    static randomProduce(respawn){
         var geneLength = 8;
         var genes = new Array(geneLength).fill(0).map(x => x + getRandomInt(0,1));
         var energy = getRandomInt(100,200);
@@ -207,12 +207,12 @@ class Organism extends GameObject {
         var newOrganism = new this(respawn.x,respawn.y,energy,dir,genes);
         return newOrganism;
     }
-
+/*
     static init(){
         var adam = this.randomProduce();
         this.list.push(adam);
     }
-
+*/
     static update(){
         this.list = this.list.filter(creature => creature.energy > 0);
 
