@@ -41,6 +41,7 @@ class InnerHTMLGenerator {
 }
 var innerHTMLGenerator = new InnerHTMLGenerator();
 
+
 class ScreenManager {
     // use : InfoManager
     static drawBackground(){

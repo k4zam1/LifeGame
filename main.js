@@ -11,6 +11,7 @@ function main(){
     }
 }
 
+
 function gameLoop(gameSpeed=InfoManager.gameSpeed){
     // 以下の内容をループする
     ScreenManager.IID = setInterval(function(){

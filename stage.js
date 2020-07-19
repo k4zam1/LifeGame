@@ -22,6 +22,7 @@ map.stageFile.addEventListener("change", function(e) {
 })
 
 
+
 function createStage(){
     for(var i=0; i<stageLayout.length; i++){
         for(var j=0; j<stageLayout[i].length; j++){

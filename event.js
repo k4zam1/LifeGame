@@ -47,6 +47,7 @@ function onDown(e){
         default: break;
     }
 }
+
 function onUp(e){}
 function onClick(e){}
 function onOut(e){　mouseout = true;　}
