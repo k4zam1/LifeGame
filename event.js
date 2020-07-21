@@ -1,6 +1,5 @@
 function keyDown(e){
     modeChanging = true;
-    
     if(e.shiftKey){
         modeNumber++;
     }
@@ -11,36 +10,44 @@ function keyDown(e){
     mouseMode = mouseModes[modeNumber];
     InfoManager.mode = mouseMode;
 }
+var MODE_INFORMATION = 0;
+var MODE_DELETE_WALL = 1;
+var MODE_CREATE_WALL = 2;
 
 function onDown(e){
     switch(modeNumber){
-        case 0: /*--: information */ InfoManager.clickedObj = MAP.find(mousePoint.x,mousePoint.y);
-        case 1:
-        /*--: create */
-            // 壁上限の場合
-            if(Wall.isLimit()) break;
-            var intervalID2 = setInterval(function(){
-                // カーソルがキャンパス外に出た || 壁の上限 || mouseModeが変更されていた
-                if(mouseout || Wall.isLimit() || modeChanging){
-                    clearInterval(intervalID2);
-                    modeChanging = (modeChanging) ? false : true;
+        case MODE_INFORMATION:
+            MAP.highlight = new Point(mousePoint.x,mousePoint.y);
+            break;
+        case MODE_DELETE_WALL:
+            if(Wall.isLimit()){
+                return;
+            }
+            var IID = setInterval(function(){
+                // カーソルがキャンパス外に出た || mouseModeが変更されていた
+                if(mouseout ||  Wall.isLimit() || modeChanging){
+                    clearInterval(IID);
+                    modeChanging = (modeChanging) ? false : true;   
                 }
                 Wall.create(mousePoint);
                 // クリックを終えたとき、処理を終了
-                canvas.onmouseup = function(e){ if(e.button == 0) clearInterval(intervalID2); }
+                canvas.onmouseup = function(e){
+                    if(e.button == 0) clearInterval(IID);
+                }
             },20);
             break;
-        case 2:
-        /*--: delete */
-            var intervalID2 = setInterval(function(){
+        case MODE_CREATE_WALL:
+            var IID = setInterval(function(){
                 // カーソルがキャンパス外に出た || mouseModeが変更されていた
                 if(mouseout || modeChanging){
-                    clearInterval(intervalID2);
+                    clearInterval(IID);
                     modeChanging = (modeChanging) ? false : true;
                 }
                 Wall.delete(mousePoint);
                 // クリックを終えたとき、処理を終了
-                canvas.onmouseup = function(e){ if(e.button == 0) clearInterval(intervalID2); }
+                canvas.onmouseup = function(e){
+                    if(e.button == 0) clearInterval(IID);
+                }
             },20);
             break;
         default: break;
@@ -53,11 +60,7 @@ function onOut(e){　mouseout = true;　}
 function onOver(e){　mouseout = false;　}
 function onMove(e){
     // カーソルが動いた場合、キャンパス内のカーソルの座標を更新
-    mouseX = e.offsetX;
-    mouseY = e.offsetY;
-    cellLeft = (Math.floor(mouseX/10));
-    cellTop = (Math.floor(mouseY/10));
-    mousePoint = new Point(cellLeft,cellTop);
+    mousePoint = new Point((Math.floor(e.offsetX/10)),(Math.floor(e.offsetY/10)));
 }
 
 // イベント登録

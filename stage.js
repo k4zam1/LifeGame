@@ -1,5 +1,8 @@
+
 // ステージの追加
-map.stageFile.addEventListener("change", function(e) {
+var STAGE = document.getElementById("stageSelect");
+var stageLayout = [];   // 二次元配列を入れるための配列
+STAGE.stageFile.addEventListener("change", function(e) {
     var result = e.target.files[0];
 
     //FileReaderのインスタンスを作成する
@@ -21,22 +24,34 @@ map.stageFile.addEventListener("change", function(e) {
     })
 })
 
-
+var S_WALL = 1;
+var S_BUG = 2;
+var S_HERBIVORES = 3;
+var S_CARNIVORE = 4;
+var S_PREDATOR = 5;
 
 function createStage(){
     for(var i=0; i<stageLayout.length; i++){
         for(var j=0; j<stageLayout[i].length; j++){
-            if(stageLayout[i][j] == 1){
-                Wall.__wallCount += 1;
-                var p = new Point(j,i);
+            var p = new Point(j,i);
+
+            if(stageLayout[i][j] == S_WALL){
                 Wall.create(p);
-            }else if(stageLayout[i][j] == 2){
-                var sp = new Point(j,i);
-                Animal.randomSpawn(sp);
-            }else if(stageLayout[i][j] == 3){
-                var sp = new Point(j,i);
-                Predator.randomSpawn(sp);
             }
+            else if(stageLayout[i][j] == S_BUG){
+                Bug.randomSpawn(p);
+            }
+            else if(stageLayout[i][j] == S_HERBIVORES){
+                Herbivores.randomSpawn(p);
+            }
+            else if(stageLayout[i][j] == S_CARNIVORE){
+                Carnivore.randomSpawn(p);
+            }
+            else if(stageLayout[i][j] == S_PREDATOR){
+                Predator.randomSpawn(p);
+            }
+
+
         }
     }
     InfoManager.remainingWalls = 20;

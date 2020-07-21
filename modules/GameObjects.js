@@ -1,15 +1,11 @@
 
 // moleculesを使うものはここに書く
-
-
 /*---------------------------------------------------------------------------------------*
  *  Wall
  *---------------------------------------------------------------------------------------*/
-
-
 class Wall extends GameObject {
     static isLimit(){
-        return (InfoManager.remainingWalls > 0);
+        return (InfoManager.remainingWalls < 0);
     }
     static create(mouse){
         var wall = new Wall(mouse.x,mouse.y);
@@ -29,7 +25,8 @@ InfoManager.remainingWalls = 20;
  *  Resource
  *---------------------------------------------------------------------------------------*/
 class Resource extends GameObject {
-    static update(){
+    static color = new Color(250,250,0);
+    static add(){
         var p = Point.getRandomPoint();
         var found = MAP.find(p.x,p.y);
         if(!found){
@@ -39,38 +36,33 @@ class Resource extends GameObject {
     }
 }
 
-Resource.color = new Color(250,165,0);
-
-
 
 /*---------------------------------------------------------------------------------------*
  *  BreederReactor
  *---------------------------------------------------------------------------------------*/
 class BreederReactor  extends GameObject {
+    static color = new Color(240,90,240);
+    static timeLimit = 100;
     constructor(x,y){
         super(x,y);
         this.published = InfoManager.day;
     }
-    static update(){
-        /*
-        for(var BR of BreederReactor.list){
-
-            // 生物を増殖させる
-            var respawn = BR.point;
-            var clone = Animal.randomProduce(respawn);
-            Animal.list.push(clone);
-
-            // 期限が来たら壊す
-            if(InfoManager.day - BR.published >= BreederReactor.timeLimit){
-                var found = BreederReactor.list.findIndex(br => br.id == BR.id);
-                if(found != -1) BreederReactor.list.splice(found,1);
-            }
+    
+    update(){
+        // 期限が来たら壊す
+        if(InfoManager.day - this.published >= BreederReactor.timeLimit){
+            MAP.delete(this);
+            return;
         }
-        */
+
+        // 生物を増殖させる
+        var sp = MAP.getBlankPoint(this.x,this.y);
+        if(sp){
+            Herbivores.randomSpawn(sp);
+        }
     }
 }
-BreederReactor.color = "rgb(240,90,240)";
-BreederReactor.timeLimit = 100;
+
 
 // select
 var select = document.querySelector("#item");
@@ -82,14 +74,14 @@ select.addEventListener("change",function(){
         case "breederReactor":
             if(InfoManager.tank < 100) break;
             InfoManager.tank -= 100;
-            var BR1 = new BreederReactor(50,50);
-            var BR2 = new BreederReactor(50+cellSize,50);
-            var BR3 = new BreederReactor(50,50+cellSize);
-            var BR4 = new BreederReactor(50+cellSize,50+cellSize);
-            BreederReactor.list.push(BR1);
-            BreederReactor.list.push(BR2);
-            BreederReactor.list.push(BR3);
-            BreederReactor.list.push(BR4);
+            var BR1 = new BreederReactor(10,10);
+            var BR2 = new BreederReactor(11,10);
+            var BR3 = new BreederReactor(10,11);
+            var BR4 = new BreederReactor(11,11);
+            MAP.register(BR1);
+            MAP.register(BR2);
+            MAP.register(BR3);
+            MAP.register(BR4);
             break;
         default : break;
     }
@@ -100,19 +92,18 @@ select.addEventListener("change",function(){
 /*---------------------------------------------------------------------------------------*
  *  Plant
  *---------------------------------------------------------------------------------------*/
-var __plantAreas = [];            // 植物が繁殖するエリア
-var __plantAreasNum = 10;      // 繁殖エリアの数
+
+var PLANT_AREAS_NUM = 10;
+var PLANT_AREAS = [];
+for(var i=0; i < PLANT_AREAS_NUM; i++){
+    PLANT_AREAS.push(Area.getRandomArea());
+}
 
 class Plant extends GameObject {
-    static init(){
-        // 繁殖エリアを配列plantAreasに追加
-        for(var i = 0; i < __plantAreasNum; i++){
-            __plantAreas.push(Area.getRandomArea());
-        }
-    }
-    static update(){
-        for(var area of __plantAreas){
-            var p = area.getRandomPoint();
+    static color = new Color(0,200,0);
+    static add(){
+        for(var area of PLANT_AREAS){
+            var p = Point.getRandomPoint(area);
             var found = MAP.find(p.x,p.y);
             if(!found){
                 MAP.register(new Plant(p.x,p.y));
@@ -120,29 +111,43 @@ class Plant extends GameObject {
         }
     }
 }
-Plant.color = new Color(0,200,0);
-
 
 
 /*---------------------------------------------------------------------------------------*
  *  Animal,Predator
  *---------------------------------------------------------------------------------------*/
-class Animal extends Organism {}
-Animal.color = new Color(255,0,0);        // 描画に利用する色
-Animal.edibles = [Plant,Resource];
-Animal.energyInc = 10;
-Animal.reproduction_energy = 10;      // 子孫を残すのに必要なエネルギー
-Animal.reproduction_interval = 5;     // 子孫を何日ごとに残すか
 
+// 虫
+class Bug extends Organism {
+    static color = new Color(140,255,50);
+    static edibles = [Plant];
+    static energyInc = 10;
+    static reproduction_energy = 2;
+    static reproduction_interval = 1;
+}
 
-class Predator extends Organism {}
-Predator.color = new Color(0,0,255);         // 描画に利用する色
-Predator.edibles = [Animal,Plant];
-Predator.energyInc = 4;
-Predator.reproduction_energy = 20;      // 子孫を残すのに必要なエネルギー
-Predator.reproduction_interval = 50;     // 子孫を何日ごとに残すか
+// 草食動物
+class Herbivores extends Organism {
+    static color = new Color(200,200,0);
+    static edibles = [Bug,Plant];
+    static energyInc = 10;
+    static reproduction_energy = 5;
+    static reproduction_interval = 8;
+}
 
+// 肉食動物
+class Carnivore extends Organism {
+    static color = new Color(200,0,200);
+    static edibles = [Herbivores,Resource];
+    static energyInc = 3;
+    static reproduction_energy = 20;
+    static reproduction_interval = 20;
+}
 
-// クラスのリストをInfoManagerに登録
-InfoManager.obstacles = [Wall,BreederReactor];
-InfoManager.classList = [Animal,Predator,Plant,Resource,BreederReactor,Wall];
+class Predator extends Organism {
+    static color = new Color(0,0,255);
+    static edibles = [Herbivores,Carnivore];
+    static energyInc = 2;
+    static reproduction_energy = 30;
+    static reproduction_interval = 20;
+}
