@@ -71,9 +71,20 @@ class ScreenManager {
         this.gameScreen.clearRect(0,0,canvas.width,canvas.height);
     }
     
-    static draw(fillStyle,obj){
-        this.gameScreen.fillStyle = fillStyle;
-        this.gameScreen.fillRect(obj.x+1,obj.y+1,cellSize-2,cellSize-2);
+    static draw(style,obj){
+        var offset = 100;
+        var color = null;
+        if(obj.type == "Animal"){
+            color = style.makeGradation(obj.energy-offset,0,0);
+        }
+        else if(obj.type == "Predator"){
+            color = style.makeGradation(0,0,obj.energy-offset);
+        }
+        else{
+            color = style.color;
+        }
+        this.gameScreen.fillStyle = color;
+        this.gameScreen.fillRect(obj.x*cellSize+1,obj.y*cellSize+1,cellSize-2,cellSize-2);
     }
 }
 ScreenManager.gameScreen = context;
@@ -91,16 +102,13 @@ class GameObject {
         this.point = new Point(x,y);
         this.type = this.constructor.name;
     }
-
-    static draw(){
-        this.list.forEach(obj =>  ScreenManager.draw(this.color,obj));
+    draw(){
+        ScreenManager.draw(this.constructor.color,this);
     }
 }
-GameObject.list = [];
-GameObject.color = "rgb(0,0,0)";
+GameObject.color = new Color(0,0,0);
 
 class Organism extends GameObject {
-    // use : Point,InfoManager
     constructor(x,y,energy,direction,genes){
         super(x,y);
         this.energy = energy;               // type:num
@@ -113,45 +121,55 @@ class Organism extends GameObject {
 
         // xについての移動,cellSizeを単位とする
         if(2 <= this.dir && this.dir < 5){
-            next.x += cellSize;
+            next.x += 1;
         }
         else if(this.dir == 1 || this.dir == 5){
             next.x += 0;
         }
         else {
-            next.x -= cellSize;
+            next.x -= 1;
         }
 
         // yについての移動,cellSizeを単位とする
         if(0 <= this.dir && this.dir < 3){
-            next.y -= cellSize;
+            next.y -= 1;
         }
         else if(4 <= this.dir && this.dir < 7){
-            next.y += cellSize;
+            next.y += 1;
         }
 
         // 端移動の処理
-        next.x = next.x % canvas.width;
-        next.y = next.y % canvas.height;
+        next.x = next.x % MAP.width;
+        next.y = next.y % MAP.height;
         if(next.x < 0){
-            next.x += canvas.width;
+            next.x += MAP.width;
         }
         if(next.y < 0){
-            next.y += canvas.height;
+            next.y += MAP.height;
         }
 
         // 障害物の判定
-        for(var obstacle of InfoManager.obstacles){
-            var found = obstacle.list.findIndex(obs => obs.point.eq(next));
-            if(found != -1) return;
-        }
+        var found = MAP.find(next.x,next.y);
+        var movable = false;
+        var eatable = false;
 
-        // 情報の更新
-        this.x = next.x;
-        this.y = next.y;
-        this.point.x = next.x;
-        this.point.y = next.y;
-        this.energy -= 1;
+        if(found == 0){
+            movable = true;
+        }
+        if(found != 0 && this.constructor.edibles.includes(found.constructor)){
+            movable = true;
+            eatable = true;
+        }
+        if(movable){
+            this.x = next.x;
+            this.y = next.y;
+            this.point.x = next.x;
+            this.point.y = next.y;
+            this.energy -= 1;
+        }
+        if(eatable){
+            this.eat();
+        }
     }
 
     turn(){
@@ -169,66 +187,54 @@ class Organism extends GameObject {
         }
     }
 
-    eat(edibles,energyInc=10){
-        for(var edible of edibles){
-            // 食べられるリストから自分と同じポイントの個体を探す
-            var found = edible.list.findIndex(element => this.point.eq(element));
-            // いなかった || 自分自身だった
-            if(found == -1 || this.id == edible.list[found].id) continue;
-            // energyを増やす
-            this.energy += energyInc;
-            // クリックしていたオブジェクトを消すときはclickedObjをnullに戻す
-            if(InfoManager.clickedObj != null && InfoManager.clickedObj.id == edible.list[found].id) InfoManager.clickedObj = null;
-            // オブジェクトがResourceならタンクを増やす
-            if(edible == Resource) InfoManager.tank += 1;
-            edible.list.splice(found,1);
-            break;
+    eat(){
+        var found = MAP.find(this.x,this.y);
+        
+        this.energy += this.constructor.energyInc;
+        if(found.constructor == Resource) InfoManager.tank += 1;
+        // クリックしていたオブジェクトを消すときはclickedObjをnullに戻す
+        if(InfoManager.clickedObj != 0 && InfoManager.clickedObj == found){
+            InfoManager.clickedObj = 0;
         }
+        MAP.delete(found);
     }
 
     reproduce(){
-        if(this.energy < this.reproduction_energy) return null;
-
         var energy = Math.floor(this.energy/2);
         var genes = Array.from(this.genes);
         var slot = getRandomInt(0,7);
         // 突然変異 -1,0,1をランダムのスロットに加算
         genes[slot] = Math.max(0,genes[slot]+getRandomInt(0,3)-1);
 
-        var child = new this.constructor(this.x,this.y,energy,this.dir,genes);
-        return child;
+        var p = MAP.getBlankPoint(this.x,this.y);
+        if(typeof p == "object"){
+            var child = new this.constructor(p.x,p.y,energy,this.dir,genes);
+            MAP.register(child);
+        }
     }
 
 
-    static randomProduce(respawn){
+    static randomSpawn(sp){
         var geneLength = 8;
         var genes = new Array(geneLength).fill(0).map(x => x + getRandomInt(0,1));
         var energy = getRandomInt(100,200);
         var dir = getRandomInt(0,7);
-        var newOrganism = new this(respawn.x,respawn.y,energy,dir,genes);
-        return newOrganism;
+        var newOrganism = new this(sp.x,sp.y,energy,dir,genes);
+        MAP.register(newOrganism);
     }
-/*
-    static init(){
-        var adam = this.randomProduce();
-        this.list.push(adam);
-    }
-*/
-    static update(){
-        this.list = this.list.filter(creature => creature.energy > 0);
 
-        // 行動
-        var childs = [];
-        for(var creature of this.list){
-            creature.turn();
-            creature.move();
-            creature.eat();
-            if(InfoManager.day%this.reproduction_interval == 0){
-                var child = creature.reproduce();
-                if(child != null) childs.push(child);
-            }
+    update(){
+        MAP.delete(this);
+        if(this.energy <= 0) return;
+        
+        this.turn();
+        this.move();
+        MAP.register(this);
+        
+        if(InfoManager.day%this.constructor.reproduction_interval == 0
+             && this.energy > this.constructor.reproduction_energy){
+            this.reproduce();
         }
-        childs.forEach(child => this.list.push(child));
     }
 }
 

@@ -24,7 +24,16 @@ function gameLoop(gameSpeed=InfoManager.gameSpeed){
 
         // ゲーム終了
         if(InfoManager.day >= InfoManager.finish){
-            var winner = (Animal.list.length >= Predator.list.length) ? "Animal" : "Predator";
+            var na = 0;
+            var np = 0;
+            for(var h=0;h<MAP.height;h++){
+                for(var w=0;w<MAP.width;w++){
+                    if(MAP.map[h][w] == 0) continue;
+                    if(MAP.map[h][w].type == "Animal") na++;
+                    if(MAP.map[h][w].type == "Predator") np++;
+                }
+            }
+            var winner = (na >= np) ? "Animal" : "Predator";
             ScreenManager.showFinishScreen(winner);
             clearInterval(ScreenManager.IID);
         }

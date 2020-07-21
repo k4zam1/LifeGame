@@ -28,15 +28,16 @@ function createStage(){
         for(var j=0; j<stageLayout[i].length; j++){
             if(stageLayout[i][j] == 1){
                 Wall.__wallCount += 1;
-                var p = new Point(cellSize*j,cellSize*i);
+                var p = new Point(j,i);
                 Wall.create(p);
             }else if(stageLayout[i][j] == 2){
-                var spwanAnimal = new Point(cellSize*j,cellSize*i);
-                Animal.list.push(Animal.randomProduce(spwanAnimal));
+                var sp = new Point(j,i);
+                Animal.randomSpawn(sp);
             }else if(stageLayout[i][j] == 3){
-                var spwanPredator = new Point(cellSize*j,cellSize*i);
-                Predator.list.push(Predator.randomProduce(spwanPredator));
+                var sp = new Point(j,i);
+                Predator.randomSpawn(sp);
             }
         }
     }
+    InfoManager.remainingWalls = 20;
 }

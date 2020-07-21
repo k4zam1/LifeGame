@@ -14,7 +14,7 @@ function keyDown(e){
 
 function onDown(e){
     switch(modeNumber){
-        case 0: /*--: information */ InfoManager.registerClickedObject(mousePoint);break;
+        case 0: /*--: information */ InfoManager.clickedObj = MAP.find(mousePoint.x,mousePoint.y);
         case 1:
         /*--: create */
             // 壁上限の場合
@@ -38,7 +38,6 @@ function onDown(e){
                     clearInterval(intervalID2);
                     modeChanging = (modeChanging) ? false : true;
                 }
-                // 壁オブジェクトがあった場合、それを削除する
                 Wall.delete(mousePoint);
                 // クリックを終えたとき、処理を終了
                 canvas.onmouseup = function(e){ if(e.button == 0) clearInterval(intervalID2); }
@@ -56,8 +55,8 @@ function onMove(e){
     // カーソルが動いた場合、キャンパス内のカーソルの座標を更新
     mouseX = e.offsetX;
     mouseY = e.offsetY;
-    cellLeft = (Math.floor(mouseX/10))*10;
-    cellTop = (Math.floor(mouseY/10))*10;
+    cellLeft = (Math.floor(mouseX/10));
+    cellTop = (Math.floor(mouseY/10));
     mousePoint = new Point(cellLeft,cellTop);
 }
 

@@ -1,5 +1,15 @@
 
 //　軽量版ベータ
+
+// "{}".format
+String.prototype.format = function () {
+    var i = 0, args = arguments;
+    return this.replace(/{}/g, function () {
+        return typeof args[i] != 'undefined' ? args[i++] : '';
+    });
+};
+
+
 /*------------------------------------------------------
  * common variables
  *-------------------------------------------------------*/
@@ -41,6 +51,84 @@ function getRandomInt(min,max){ return Math.floor(Math.random()*(max+1-min))+min
 /*------------------------------------------------------
  * common class
  *-------------------------------------------------------*/
+class Color {
+    constructor(r,g,b){
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        this.color = this.__makeRGB();
+    }
+    __makeRGB(){
+        return "rgb({},{},{})".format(this.r,this.g,this.b);
+    }
+    set(r,g,b){
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        this.color = this.__makeRGB();
+    }
+    makeGradation(r,g,b){
+        var tr = this.r + r;
+        var tg = this.g + g;
+        var tb = this.b + b;
+        return "rgb({},{},{})".format(tr,tg,tb);
+    }
+}
+
+
+class Map {
+    constructor(width,height){
+        this.width = width;
+        this.height = height;
+        this.map = Array.from(new Array(height), () => new Array(width).fill(0));
+    }
+    register(target){
+        this.map[target.y][target.x] = target;
+    }
+    delete(target){
+        this.map[target.y][target.x] = 0;
+    }
+    find(x,y){
+        return this.map[y][x];
+    }
+    update(){
+        for(var h=0;h<this.height;h++){
+            for(var w=0;w<this.width;w++){
+                if(this.map[h][w] == 0) continue;
+                if(typeof this.map[h][w].update == "function"){
+                    this.map[h][w].update();
+                }
+            }
+        }
+    }
+    draw(){
+        for(var h=0;h<this.height;h++){
+            for(var w=0;w<this.width;w++){
+                if(this.map[h][w] == 0) continue;
+                if(typeof this.map[h][w].draw == "function"){
+                    this.map[h][w].draw();
+                }
+            }
+        }
+    }
+    getBlankPoint(x,y){
+        for(var i=-1;i<1;i++){
+            for(var j=-1;j<1;j++){
+                var px = x+i%MAP.width;
+                var py = y+j%MAP.height;
+                if(px < 0) px += MAP.width;
+                if(py < 0) py += MAP.height;
+                var found = this.find(px,py);
+                if(!found){
+                    return new Point(px,py);
+                }
+            }
+        }
+        return 0;
+    }
+}
+var MAP = new Map(canvas.width/cellSize,canvas.height/cellSize);
+
 
  // 情報ボックスで表示する変数はInfoManagerに登録する
 class InfoManager {
@@ -66,42 +154,38 @@ class InfoManager {
         this.classList.forEach(cls => objects.push(cls.list));
         return objects;
     }
-    static registerClickedObject(mousePoint){
-        // クリックしたオブジェクトを取得
-        for(var objects of InfoManager.getAllObjectList()){
-            var clickedObj = objects.find(obj => obj.point.eq(mousePoint));
-            if(clickedObj != undefined) break;
-        }
-        if(clickedObj == undefined) return;
-        this.clickedObj = clickedObj;
-    }
 
     // 各情報を更新して再描画する
     static update(){
         InfoManager.day += 1;
+        
         // オブジェクトを更新・描画
         for(var cls of InfoManager.classList){
             if(typeof cls.update == "function"){
                 cls.update();
             }
-            cls.draw();
         }
+        MAP.update();
+        MAP.draw();
+
+
         // クリックされてるオブジェクトをハイライト
-        if(InfoManager.clickedObj != null){
+        if(InfoManager.clickedObj != 0){
             if(InfoManager.clickedObj.energy == 0){ 
-                this.clickedObj = null;
+                this.clickedObj = 0;
                 return;
             }
-            ScreenManager.draw("rgb(200,200,0)",InfoManager.clickedObj);
+            ScreenManager.draw(this.highlight,InfoManager.clickedObj);
         }
     }
 }
 InfoManager.day = 0;
 InfoManager.tank = 0;
 InfoManager.mode = "information";
-InfoManager.clickedObj = null;
+InfoManager.clickedObj = 0;
 InfoManager.gameSpeed = 100;
 InfoManager.finish = 1000;      // 何dayで終わるか
+InfoManager.highlight = new Color(200,200,0);
 
 
 // ゲーム速度が変化したときに呼び出される関数
@@ -123,41 +207,36 @@ class Point {
     }
 
     static getRandomWidth(){
-        return getRandomInt(0,canvas.width/cellSize);
+        return getRandomInt(0,MAP.width-1);
     }
 
     static getRandomHeight(){
-        return getRandomInt(0,canvas.height/cellSize);
+        return getRandomInt(0,MAP.height-1);
     }
 
     static getRandomPoint(){
         var w = this.getRandomWidth();
         var h = this.getRandomHeight();
-        var p = new Point(w*cellSize,h*cellSize);
+        var p = new Point(w,h);
         return p;
-    }
-
-    static getRandomPointIn(areas){
-        var points = [];
-        for(var i = 0; i < areas.length; i++){
-            var p = new Point(
-                Math.floor(Math.random()*areas[i].range + areas[i].AreaX)*cellSize,
-                Math.floor(Math.random()*areas[i].range + areas[i].AreaY)*cellSize);
-            points.push(p);
-        }
-        return points;
     }
 }
 
 class Area {
-    constructor(minX,minY,areaRange,randomRange){
-        this.AreaX = Math.floor(Math.random()*minX)/cellSize;
-        this.AreaY = Math.floor(Math.random()*minY)/cellSize; 
-        this.range = Math.floor(Math.random()*randomRange + areaRange);
+    constructor(){
+        this.range = getRandomInt(0,10);
+        this.x = getRandomInt(0,MAP.width-this.range-1);
+        this.y = getRandomInt(0,MAP.height-this.range-1);
+    }
+    
+    getRandomPoint(){
+        var x = getRandomInt(this.x,this.x+this.range);
+        var y = getRandomInt(this.y,this.y+this.range);
+        return new Point(x,y);
     }
 
     static getRandomArea(){
-        var area = new Area(canvas.width,canvas.clientHeight,5,4);
+        var area = new Area();
         return area;
     }
 }

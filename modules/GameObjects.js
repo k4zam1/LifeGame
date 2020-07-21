@@ -9,35 +9,20 @@
 
 class Wall extends GameObject {
     static isLimit(){
-        return (Wall.list.length >= this.__wallCount);
+        return (InfoManager.remainingWalls > 0);
     }
     static create(mouse){
-        // オブジェクトがあった場合、それを削除する
-        for(var cls of InfoManager.classList){
-            var found = cls.list.findIndex(obj => obj.point.eq(mouse));
-            if(found != -1) cls.list.splice(found,1);
-        }
-        
-        var newBlock = new Wall(mouse.x,mouse.y);
-        Wall.list.push(newBlock);
-
-        // gameRoutineに依存せず即座に描画
-        ScreenManager.draw(this.color,mouse);
-        InfoManager.remainingWalls = this.__wallCount - Wall.list.length;
+        var wall = new Wall(mouse.x,mouse.y);
+        MAP.register(wall);
+        InfoManager.remainingWalls--;
     }
     static delete(mouse){
-        var found = Wall.list.findIndex(wall => wall.point.eq(mouse));
-        if(found == -1) return;
-        
-        // ブロックを消す
-        ScreenManager.draw("rgb(100,100,100)",Wall.list[found]);
-        Wall.list.splice(found,1);
-        InfoManager.remainingWalls = this.__wallCount - Wall.list.length;
+        var found = MAP.find(mouse.x,mouse.y);
+        MAP.delete(found);
+        InfoManager.remainingWalls++;
     }
 }
-Wall.list = [];
-Wall.__wallCount = 20;
-InfoManager.remainingWalls = Wall.__wallCount;
+InfoManager.remainingWalls = 20;
 
 
 /*---------------------------------------------------------------------------------------*
@@ -46,12 +31,15 @@ InfoManager.remainingWalls = Wall.__wallCount;
 class Resource extends GameObject {
     static update(){
         var p = Point.getRandomPoint();
-        var r = new Resource(p.x,p.y);
-        Resource.list.push(r);
+        var found = MAP.find(p.x,p.y);
+        if(!found){
+            var r = new Resource(p.x,p.y);
+            MAP.register(r);
+        }
     }
 }
-Resource.list = [];
-Resource.color = "rgb(250,165,0)";
+
+Resource.color = new Color(250,165,0);
 
 
 
@@ -64,6 +52,7 @@ class BreederReactor  extends GameObject {
         this.published = InfoManager.day;
     }
     static update(){
+        /*
         for(var BR of BreederReactor.list){
 
             // 生物を増殖させる
@@ -77,9 +66,9 @@ class BreederReactor  extends GameObject {
                 if(found != -1) BreederReactor.list.splice(found,1);
             }
         }
+        */
     }
 }
-BreederReactor.list = [];
 BreederReactor.color = "rgb(240,90,240)";
 BreederReactor.timeLimit = 100;
 
@@ -122,45 +111,36 @@ class Plant extends GameObject {
         }
     }
     static update(){
-        // 各繁殖エリア内で植物をランダムに作成
-        var newPlantPoints = Point.getRandomPointIn(__plantAreas);
-        newPlantPoints.forEach(p => this.list.push(new Plant(p.x,p.y)));
+        for(var area of __plantAreas){
+            var p = area.getRandomPoint();
+            var found = MAP.find(p.x,p.y);
+            if(!found){
+                MAP.register(new Plant(p.x,p.y));
+            }
+        }
     }
 }
-Plant.list = [];
-Plant.color = "rgb(0,200,0)";
+Plant.color = new Color(0,200,0);
 
 
 
 /*---------------------------------------------------------------------------------------*
  *  Animal,Predator
  *---------------------------------------------------------------------------------------*/
-class Animal extends Organism {
-    eat(){ super.eat(__ANIMAL_EDIBLES,__ANIMAL_ENERGY_INC); }
-}
-// Local Variables
-var __ANIMAL_EDIBLES = [Plant,Resource];
-var __ANIMAL_ENERGY_INC = 10;
-
-// Settings
-Animal.list = [];
-Animal.color = "rgb(200,0,0)";        // 描画に利用する色
+class Animal extends Organism {}
+Animal.color = new Color(255,0,0);        // 描画に利用する色
+Animal.edibles = [Plant,Resource];
+Animal.energyInc = 10;
 Animal.reproduction_energy = 10;      // 子孫を残すのに必要なエネルギー
 Animal.reproduction_interval = 5;     // 子孫を何日ごとに残すか
 
 
-class Predator extends Organism {
-    eat(){ super.eat(__PREDATOR_EDIBLES,__PREDATOR_ENERGY_INC); }
-}
-// Local Variables
-var __PREDATOR_EDIBLES = [Animal,Predator];
-var __PREDATOR_ENERGY_INC = 10;
-
-// Settings
-Predator.list = [];
-Predator.color = "rgb(0,0,200)"         // 描画に利用する色
+class Predator extends Organism {}
+Predator.color = new Color(0,0,255);         // 描画に利用する色
+Predator.edibles = [Animal,Plant];
+Predator.energyInc = 4;
 Predator.reproduction_energy = 20;      // 子孫を残すのに必要なエネルギー
-Predator.reproduction_interval = 10;     // 子孫を何日ごとに残すか
+Predator.reproduction_interval = 50;     // 子孫を何日ごとに残すか
 
 
 // クラスのリストをInfoManagerに登録
