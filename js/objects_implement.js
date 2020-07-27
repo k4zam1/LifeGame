@@ -5,20 +5,21 @@
  *---------------------------------------------------------------------------------------*/
 class Wall extends GameObject {
     static isLimit(){
-        return (InfoManager.remainingWalls < 0);
+        return (INFO.remainingWalls < 0);
     }
     static create(mouse){
-        var wall = new Wall(mouse.x,mouse.y);
-        MAP.register(wall);
-        InfoManager.remainingWalls--;
+        var found = new Wall(mouse.x,mouse.y);
+        MAP.register(found);
+        INFO.remainingWalls--;
     }
     static delete(mouse){
         var found = MAP.find(mouse.x,mouse.y);
-        MAP.delete(found);
-        InfoManager.remainingWalls++;
+        if(found && found.type == "Wall"){
+            MAP.delete(found);
+            INFO.remainingWalls++;
+        }
     }
 }
-InfoManager.remainingWalls = 20;
 
 
 /*---------------------------------------------------------------------------------------*
@@ -45,12 +46,12 @@ class BreederReactor  extends GameObject {
     static timeLimit = 100;
     constructor(x,y){
         super(x,y);
-        this.published = InfoManager.day;
+        this.published = INFO.day;
     }
     
     update(){
         // 期限が来たら壊す
-        if(InfoManager.day - this.published >= BreederReactor.timeLimit){
+        if(INFO.day - this.published >= BreederReactor.timeLimit){
             MAP.delete(this);
             return;
         }
@@ -72,16 +73,7 @@ select.addEventListener("change",function(){
     var selectedItem = options[this.selectedIndex].value;
     switch(selectedItem){
         case "breederReactor":
-            if(InfoManager.tank < 100) break;
-            InfoManager.tank -= 100;
-            var BR1 = new BreederReactor(10,10);
-            var BR2 = new BreederReactor(11,10);
-            var BR3 = new BreederReactor(10,11);
-            var BR4 = new BreederReactor(11,11);
-            MAP.register(BR1);
-            MAP.register(BR2);
-            MAP.register(BR3);
-            MAP.register(BR4);
+            INFO.modeNumber = INFO.MODE_CREATE_BR;
             break;
         default : break;
     }
@@ -96,7 +88,7 @@ select.addEventListener("change",function(){
 var PLANT_AREAS_NUM = 10;
 var PLANT_AREAS = [];
 for(var i=0; i < PLANT_AREAS_NUM; i++){
-    PLANT_AREAS.push(Area.getRandomArea());
+    PLANT_AREAS.push(MAP.getRandomArea());
 }
 
 class Plant extends GameObject {
@@ -114,40 +106,43 @@ class Plant extends GameObject {
 
 
 /*---------------------------------------------------------------------------------------*
- *  Animal,Predator
+ *  bio
  *---------------------------------------------------------------------------------------*/
 
+/*
 // 虫
 class Bug extends Organism {
     static color = new Color(140,255,50);
-    static edibles = [Plant];
+    static edibles = ["Plant","Resource"];
     static energyInc = 10;
-    static reproduction_energy = 2;
+    static reproduction_energy = 0;
     static reproduction_interval = 1;
 }
 
 // 草食動物
 class Herbivores extends Organism {
-    static color = new Color(200,200,0);
-    static edibles = [Bug,Plant];
-    static energyInc = 10;
-    static reproduction_energy = 5;
-    static reproduction_interval = 8;
+    static color = new Color(200,100,50);
+    static edibles = ["Bug","Plant"];
+    static energyInc = 7;
+    static reproduction_energy = 15;
+    static reproduction_interval = 10;
 }
+
+*/
 
 // 肉食動物
 class Carnivore extends Organism {
-    static color = new Color(200,0,200);
-    static edibles = [Herbivores,Resource];
-    static energyInc = 3;
-    static reproduction_energy = 20;
-    static reproduction_interval = 20;
+    static color = new Color(200,50,200);
+    static edibles = ["Plant","Resource"];
+    static energyInc = 10;
+    static reproduction_energy = 10;
+    static reproduction_interval = 5;
 }
 
 class Predator extends Organism {
-    static color = new Color(0,0,255);
-    static edibles = [Herbivores,Carnivore];
-    static energyInc = 2;
-    static reproduction_energy = 30;
-    static reproduction_interval = 20;
+    static color = new Color(50,50,250);
+    static edibles = ["Plant","Resource"];
+    static energyInc = 10;
+    static reproduction_energy = 15;
+    static reproduction_interval = 5;
 }

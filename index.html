@@ -3,7 +3,6 @@
 <title>LIFE GAME</title>
 <link rel="stylesheet" type="text/css" href="style.css"/>
 <body>
-
     <div id="app">
         <canvas id="canvas" width="640" height="480"></canvas>
         <canvas id="background" width="640" height="480"></canvas>
@@ -18,29 +17,59 @@
                 </form>
             </div>
             <div id="speed">
-                S <input id="gameSpeedSlider" type="range" name="speed" min="0" max="1000" oninput="changeSpeed(this.value)" > F
+                S <input id="gameSpeedSlider" type="range" name="speed" min="0" max="1000" oninput="INFO.gameSpeed = 1000 - this.value;" > F
             </div>
             <select id="item">
                 <option value="none">----</option>
                 <option value="breederReactor">増殖炉</option>
             </select>
+
+            <div class="container add-control">
+                <input type="radio" id="modeC" class="radio" name="tab" checked="checked"><label class="tab-title titleC" for="modeC">create</label>
+                <input type="radio" id="modeB" class="radio" name="tab" ><label class="tab-title titleB" for="modeB">break</label>
+                    <div class="tab-body">
+                        <div class="create">
+                            <div class="itemCreate">
+                            <input type="radio" id="itemC1" class="radio" name="itemC" checked="checked"><label class="itemC-name itemC-name1" for="itemC1">壁</label>
+                            <input type="radio" id="itemC2" class="radio" name="itemC" ><label class="itemC-name itemC-name2" for="itemC2">増殖炉</label>
+                            <input type="radio" id="itemC3" class="radio" name="itemC" ><label class="itemC-name itemC-name3" for="itemC3">その他</label>
+                                <div class="itemC-body">
+                                    <div class="bodyC1" id="bodyC">説明文</div>
+                                    <div class="bodyC2" id="bodyC">説明文</div>
+                                    <div class="bodyC3" id="bodyC">説明文</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="break">
+                            <div class="itemBreak">
+                            <input type="radio" id="itemB1" class="radio" name="itemB" checked="checked"><label class="itemB-name itemB-name1" for="itemB1">壁</label>
+                            <input type="radio" id="itemB2" class="radio" name="itemB" ><label class="itemB-name itemB-name2" for="itemB2">その他</label>
+                            <input type="radio" id="itemB3" class="radio" name="itemB" ><label class="itemB-name itemB-name3" for="itemB3">その他</label>
+                                <div class="itemB-body">
+                                    <div class="bodyB1" id="bodyB">説明文</div>
+                                    <div class="bodyB2" id="bodyB">説明文</div>
+                                    <div class="bodyB3" id="bodyB">説明文</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
         </div>
 
     </div>
-    <!-- atom,molecules -->
-    <script src="modules/atom.js"></script>
-    <script src="modules/molecules.js"></script>
+    <script src="lib/lib_core.js"></script>
+    <script src="lib/lib_point.js"></script>
+    <script src="lib/lib_color.js"></script>
+    <script src="lib/lib_map.js"></script>
 
-    <!-- organisms -->
-    <script src="modules/GameObjects.js"></script>
-
-    <!-- template -->
-    <script src="event.js"></script>
-    <script src="stage.js"></script>
-
-    <!-- pages -->
-    <script src="main.js"></script>
-    <script src="stage.js"></script>
+    <script src="js/globals.js"></script>
+    <script src="js/html_generator.js"></script>
+    <script src="js/objects_interface.js"></script>
+    <script src="js/objects_implement.js"></script>
+    <script src="js/event.js"></script>
+    <script src="js/stage.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/stage.js"></script>
     <br/>
     <input type="button" value="Start" onclick="main();"/>
 </body>

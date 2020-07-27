@@ -24,35 +24,24 @@ STAGE.stageFile.addEventListener("change", function(e) {
     })
 })
 
-var S_WALL = 1;
-var S_BUG = 2;
-var S_HERBIVORES = 3;
-var S_CARNIVORE = 4;
-var S_PREDATOR = 5;
-
 function createStage(){
+    var CREATEFUNC = {
+        0 : function(p){ },
+        1 : function(p){ Wall.create(p) },
+        2 : function(p){ Bug.randomSpawn(p) },
+        3 : function(p){ Herbivores.randomSpawn(p) },
+        4 : function(p){ Carnivore.randomSpawn(p) },
+        5 : function(p){ Predator.randomSpawn(p) }
+    }
     for(var i=0; i<stageLayout.length; i++){
         for(var j=0; j<stageLayout[i].length; j++){
-            var p = new Point(j,i);
-
-            if(stageLayout[i][j] == S_WALL){
-                Wall.create(p);
+            var blocktype = stageLayout[i][j];
+            var create = CREATEFUNC[blocktype];
+            if(create){
+                var point = new Point(j,i);
+                create(point);
             }
-            else if(stageLayout[i][j] == S_BUG){
-                Bug.randomSpawn(p);
-            }
-            else if(stageLayout[i][j] == S_HERBIVORES){
-                Herbivores.randomSpawn(p);
-            }
-            else if(stageLayout[i][j] == S_CARNIVORE){
-                Carnivore.randomSpawn(p);
-            }
-            else if(stageLayout[i][j] == S_PREDATOR){
-                Predator.randomSpawn(p);
-            }
-
-
         }
     }
-    InfoManager.remainingWalls = 20;
+    INFO.remainingWalls = 20;
 }

@@ -1,51 +1,8 @@
 
-// ATOMを使うものはここに書く
-class InnerHTMLGenerator {
-    constructor(){
-        this.info = {
-            "day":InfoManager.day,
-            "mode":InfoManager.mode,
-            "tank":InfoManager.tank,
-            "remaining_walls":InfoManager.remainingWalls,
-            "id":null,
-            "type":null,
-            "x":null,
-            "y":null,
-            "energy":null,
-            "genes":null
-        };
-    }
-    generate(){
-        var text = "<p>";
-        if(MAP.highlight != imaginaryPoint){
-            var found = MAP.find(MAP.highlight.x,MAP.highlight.y);
-        }
-        for(let title in this.info){
-            // clickdObjの情報があれば追加
-            if(!this.info[title] && found && found[title] != undefined){
-                text += title+":"+found[title]+"<br/>";
-            }
-            else if(this.info[title]){
-                text += title+":"+this.info[title]+"<br/>"
-            }
-        }
-        text += "</p>";
-        return text;
-    }
-    update(){
-        this.info.day = InfoManager.day;
-        this.info.mode = InfoManager.mode;
-        this.info.tank = InfoManager.tank;
-        this.info.remaining_walls = InfoManager.remainingWalls;
-        TEXTBOX.innerHTML = this.generate();
-    }
-}
-var infoBox = new InnerHTMLGenerator();
-
-
 // セルに配置するクラスに継承する
 class GameObject {
-    static color = new Color(50,50,50);
+    static color = new Color(60,60,60);
+
     constructor(x,y){
         this.id = IDAllocator.allocate();
         this.x = x;
@@ -55,32 +12,43 @@ class GameObject {
     }
     draw(highlight=false){
         var offset = 80;
-        var color = null;
         var style = this.constructor.color;
-        if(this.type == "Carnivore"){
-            color = style.makeGradation(this.energy-offset,0,0);
-        }
-        else if(this.type == "Herbivores"){
-            color = style.makeGradation(0,this.energy-offset,0);
-        }
-        else if(this.type == "Bug"){
-            color = style.makeGradation(0,this.energy-offset,0);
-        }
-        else if(this.type == "Predator"){
-            color = style.makeGradation(0,0,this.energy-offset);
-        }
-        else{
-            color = style.color;
+        var color = style.color;
+        switch(this.type){
+            case "Carnivore":
+                color = style.makeGradation(this.energy-offset,0,0);
+                break;
+            case "Herbivores":
+                color = style.makeGradation(0,this.energy-offset,0);
+                break;
+            case "Bug":
+                color = style.makeGradation(0,this.energy-offset,0);
+                break;
+            case "Predator":
+                color = style.makeGradation(0,0,this.energy-offset);
+                break;
+            default :
+                color = style.color;
         }
         if(highlight){
             color = "rgb(200,200,0)";
         }
-        context.fillStyle = color;
-        context.fillRect(this.x*cellSize+1,this.y*cellSize+1,cellSize-2,cellSize-2);
+        INFO.context.fillStyle = color;
+        INFO.context.fillRect(this.x*INFO.cellSize+1,this.y*INFO.cellSize+1,INFO.cellSize-2,INFO.cellSize-2);
+    }
+    hasOwnMethod(method) {
+        return typeof this[method] == "function";
     }
 }
 
 class Organism extends GameObject {
+    
+    static color = new Color(0,0,0);
+    static edibles = [];
+    static energyInc = 0;
+    static reproduction_energy = 100;
+    static reproduction_interval = 1;
+
     constructor(x,y,energy,direction,genes){
         super(x,y);
         this.energy = energy;               // type:num
@@ -128,7 +96,7 @@ class Organism extends GameObject {
         if(found == 0){
             movable = true;
         }
-        if(found != 0 && this.constructor.edibles.includes(found.constructor)){
+        if(found != 0 && this.constructor.edibles.includes(found.type)){
             movable = true;
             eatable = true;
         }
@@ -164,7 +132,7 @@ class Organism extends GameObject {
     eat(){
         // かならずMAP.register()の前に使う
         var found = MAP.find(this.x,this.y);
-        if(found.constructor == Resource) InfoManager.tank += 1;
+        if(found.constructor == Resource) INFO.tank += 1;
         // クリックしていたオブジェクトを消すときはhighlighをオフ
         if(MAP.highlight.eq(found.point)){
             MAP.highligh = imaginaryPoint;
@@ -209,7 +177,7 @@ class Organism extends GameObject {
         this.move();
         MAP.register(this);
         
-        if(InfoManager.day%this.constructor.reproduction_interval == 0
+        if(INFO.day%this.constructor.reproduction_interval == 0
              && this.energy > this.constructor.reproduction_energy){
             this.reproduce();
         }
