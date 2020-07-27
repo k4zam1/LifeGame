@@ -13,6 +13,7 @@ function keyDown(e){
 function onDown(e){
     switch(INFO.modeNumber){
         case INFO.MODE_INFORMATION:
+            INFO.clickedObj = MAP.find(INFO.mousePoint.x,INFO.mousePoint.y);
             MAP.highlight = new Point(INFO.mousePoint.x,INFO.mousePoint.y);
             break;
         case INFO.MODE_DELETE_WALL:
