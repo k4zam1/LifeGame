@@ -3,23 +3,70 @@
 /*---------------------------------------------------------------------------------------*
  *  Wall
  *---------------------------------------------------------------------------------------*/
-class Wall extends GameObject {
+class Wall extends Item {
+    static cost = 1;
+    static period = INFO.finish+1;
+    static size = "1x1";
     static isLimit(){
         return (INFO.remainingWalls < 0);
     }
-    static create(mouse){
-        var found = new Wall(mouse.x,mouse.y);
-        MAP.register(found);
-        INFO.remainingWalls--;
+    static create(p){
+        var success = super.create(p);
+        if(success){
+            INFO.remainingWalls--;
+        }
     }
-    static delete(mouse){
-        var found = MAP.find(mouse.x,mouse.y);
-        if(found && found.type == "Wall"){
-            MAP.delete(found);
+    static delete(p){
+        var success = super.delete.call(this,p);
+        if(success){
             INFO.remainingWalls++;
         }
     }
 }
+
+/*---------------------------------------------------------------------------------------*
+ *  BreederReactor
+ *---------------------------------------------------------------------------------------*/
+class BreederReactor  extends Item {
+    static cost = 100;
+    static period = 100;
+    static size = "4x4";
+    static color = new Color(240,90,240);
+
+    constructor(x,y){
+        super(x,y);
+        this.published = INFO.day;
+    }
+    
+    static updatePutable(){
+        INFO.putable = true;
+        var x = INFO.mousePoint.x;
+        var y = INFO.mousePoint.y;
+        for(var i=0;i<2;i++){
+            for(var j=0;j<2;j++){
+                var found = MAP.find(x+i,y+j);
+                if(found && found.type == "Wall"){
+                    INFO.putable = false;
+                }
+            }
+        }
+    }
+    static highlight(){
+        INFO.bgContext.fillStyle = (INFO.putable) ? "rgb(200,200,0)":"rgb(200,50,50)";
+        INFO.bgContext.fillRect(INFO.mousePoint.x*INFO.cellSize+1,INFO.mousePoint.y*INFO.cellSize+1,INFO.cellSize*2-2,INFO.cellSize*2-2);
+    }
+
+    update(){
+        super.update();
+
+        // 生物を増殖させる
+        var sp = MAP.getBlankPoint(this.x,this.y);
+        if(sp){
+            Carnivore.randomSpawn(sp);
+        }
+    }
+}
+INFO.items = [Wall,BreederReactor];
 
 
 /*---------------------------------------------------------------------------------------*
@@ -37,48 +84,6 @@ class Resource extends GameObject {
     }
 }
 
-
-/*---------------------------------------------------------------------------------------*
- *  BreederReactor
- *---------------------------------------------------------------------------------------*/
-class BreederReactor  extends GameObject {
-    static color = new Color(240,90,240);
-    static timeLimit = 100;
-    constructor(x,y){
-        super(x,y);
-        this.published = INFO.day;
-    }
-    
-    update(){
-        // 期限が来たら壊す
-        if(INFO.day - this.published >= BreederReactor.timeLimit){
-            MAP.delete(this);
-            return;
-        }
-
-        // 生物を増殖させる
-        var sp = MAP.getBlankPoint(this.x,this.y);
-        if(sp){
-            Herbivores.randomSpawn(sp);
-        }
-    }
-}
-
-
-// select
-var select = document.querySelector("#item");
-var options = document.querySelectorAll("#item option");
-select.addEventListener("change",function(){
-    // 選択されたoption番号を取得
-    var selectedItem = options[this.selectedIndex].value;
-    switch(selectedItem){
-        case "breederReactor":
-            INFO.modeNumber = INFO.MODE_CREATE_BR;
-            break;
-        default : break;
-    }
-    this.selectedIndex = 0;
-});
 
 
 /*---------------------------------------------------------------------------------------*

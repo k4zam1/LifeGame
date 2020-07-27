@@ -35,7 +35,7 @@ class InnerHTMLGenerator {
     }
     update(){
         this.info.day = INFO.day;
-        this.info.mode = INFO.mode;
+        this.info.mode = INFO.mouseMode;
         this.info.tank = INFO.tank;
         this.info.remaining_walls = INFO.remainingWalls;
         this.constructor.textbox.innerHTML = this.generate();

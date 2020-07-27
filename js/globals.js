@@ -5,9 +5,10 @@ var INFO = {}
 // ゲーム基本情報
 INFO.day = 0;
 INFO.tank = 0;
+INFO.finish = 1000;
 INFO.PLAYER = null;
 INFO.gameSpeed = 100;
-INFO.remainingWalls = 20;
+INFO.remainingWalls = 50;
 INFO.clickedObj = 0;
 INFO.putable = true;
 
@@ -31,8 +32,8 @@ INFO.modeNumber = 0;
 INFO.modeChanging = false;
 INFO.mouseMode = INFO.mouseModes[INFO.modeNumber];
 INFO.MODE_INFORMATION = 0;
-INFO.MODE_DELETE_WALL = 1;
-INFO.MODE_CREATE_WALL = 2;
+INFO.MODE_CREATE_WALL = 1;
+INFO.MODE_DELETE_WALL = 2;
 INFO.MODE_CREATE_BR = 3;
 
 var MAP = new Map(INFO.canvas.width/INFO.cellSize,INFO.canvas.height/INFO.cellSize);

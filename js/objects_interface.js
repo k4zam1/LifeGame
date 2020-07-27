@@ -9,6 +9,7 @@ class GameObject {
         this.y = y;
         this.point = new Point(x,y);
         this.type = this.constructor.name;
+        this.constructor.type = this.type;
     }
     draw(highlight=false){
         var offset = 80;
@@ -41,8 +42,54 @@ class GameObject {
     }
 }
 
+class Item extends GameObject {
+    static cost = 0;
+    static period = 0;
+    static size = "0x0";
+    constructor(x,y){
+        super(x,y);
+        this.published = INFO.day;
+    }
+    static create(p){
+        var found = MAP.find(p.x,p.y);
+        if(!found){
+            var newObj = new this(p.x,p.y);
+            MAP.register(newObj);
+            return 1;
+        } 
+        return 0;
+    }
+    static delete(p){
+        var found = MAP.find(p.x,p.y);
+        if(found && found.type == this.type){
+            MAP.delete(found);
+            return 1;
+        }
+        return 0;
+    }
+    // highlight関係
+    static updatePutable(){
+        INFO.putable = true;
+        var found = MAP.find(INFO.mousePoint.x,INFO.mousePoint.y);
+        if(found && found.type == "Wall"){
+            INFO.putable = false;
+        }
+    }
+    static highlight(){
+        INFO.bgContext.fillStyle = (INFO.putable) ? "rgb(200,200,0)":"rgb(200,50,50)";
+        INFO.bgContext.fillRect(INFO.mousePoint.x*INFO.cellSize+1,INFO.mousePoint.y*INFO.cellSize+1,INFO.cellSize-2,INFO.cellSize-2);
+    }
+
+    update(){
+        // 期限が来たら壊す
+        if(INFO.day - this.published >= this.constructor.period){
+            MAP.delete(this);
+            return;
+        }
+    }
+}
+
 class Organism extends GameObject {
-    
     static color = new Color(0,0,0);
     static edibles = [];
     static energyInc = 0;
