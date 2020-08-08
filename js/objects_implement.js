@@ -1,5 +1,4 @@
 
-// moleculesを使うものはここに書く
 /*---------------------------------------------------------------------------------------*
  *  Wall
  *---------------------------------------------------------------------------------------*/
@@ -8,9 +7,6 @@ class Wall extends Item {
     static period = INFO.finish+1;
     static size = "1x1";
     static soundon = false;
-    static isLimit(){
-        return (INFO.remainingWalls < 0);
-    }
     static create(p){
         var success = super.create(p);
         if(success){
@@ -26,6 +22,50 @@ class Wall extends Item {
         if(success){
             INFO.remainingWalls++;
         }
+    }
+    static isLimit(){
+        return (INFO.remainingWalls < 1);
+    }
+
+    // mouse modeがWallのもののとき
+    static onMouseOver(){
+        this.highlight();
+    }
+
+    static onMouseMove(){
+        this.updatePutable();
+        if(INFO.modeNumber == INFO.MODE_DELETE_WALL){
+            INFO.putable = (INFO.putable) ? false : true;
+        }
+        this.highlight();
+    }
+
+    static onMouseDown(){
+        var IID = setInterval(function(){
+            // 以下終了判定
+            // つくれる壁が上限になった
+            if(INFO.modeNumber == INFO.MODE_CREATE_WALL && Wall.isLimit()){
+                return;
+            }
+            // クリックを終えた
+            INFO.canvas.onmouseup = function(e){
+                if(e.button == 0) clearInterval(IID);
+            }
+            // カーソルが外に出た || Modeが変更された
+            if(INFO.mouseout || INFO.modeChanging){
+                clearInterval(IID);
+                INFO.modeChanging = (INFO.modeChanging) ? false : true;   
+            }
+
+
+            // 以下ondown時の処理
+            if(INFO.modeNumber == INFO.MODE_CREATE_WALL){
+                Wall.create(INFO.mousePoint);
+            }
+            else {
+                Wall.delete(INFO.mousePoint);
+            }
+        },20);
     }
 }
 
@@ -62,6 +102,32 @@ class BreederReactor  extends Item {
         INFO.bgContext.fillRect(INFO.mousePoint.x*INFO.cellSize+1,INFO.mousePoint.y*INFO.cellSize+1,INFO.cellSize*2-2,INFO.cellSize*2-2);
     }
 
+    // mouse modeがBreederReactorのもののとき
+    static onMouseMove(){
+        BreederReactor.updatePutable();
+        BreederReactor.highlight();
+    }
+    static onMouseOver(){
+        BreederReactor.highlight();
+    }
+    static onMouseDown(){
+        if(INFO.tank < 30 || !INFO.putable) return;
+        INFO.tank -= 30;
+        
+        var x = INFO.mousePoint.x;
+        var y = INFO.mousePoint.y;
+        for(var i=0;i<2;i++){
+            for(var j=0;j<2;j++){
+                var BR = new BreederReactor(x+i,y+j);
+                MAP.register(BR);
+            }
+        }
+
+        INFO.modeChangeTo(INFO.MODE_INFORMATION);
+        INFO.bgContext.clearRect(0,0,INFO.canvas.width,INFO.canvas.height);
+    }
+
+    // non static method
     update(){
         super.update();
 

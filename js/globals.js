@@ -5,8 +5,9 @@ var INFO = {}
 // ゲーム基本情報
 INFO.day = 0;
 INFO.tank = 0;
+INFO.STAGE = null;
 INFO.finish = 1000;
-INFO.PLAYER = null;
+INFO.PLAYER = "Red";
 INFO.gameSpeed = 100;
 INFO.remainingWalls = 50;
 INFO.clickedObj = 0;
@@ -35,5 +36,18 @@ INFO.mouseModes = ["information","createWall","breakWall"];
 INFO.modeNumber = INFO.MODE_SELECT_STAGE;
 INFO.modeChanging = false;
 INFO.mouseMode = INFO.mouseModes[INFO.modeNumber];
-INFO.PLAYER = "Red";
-INFO.STAGE = null;
+INFO.modeChangeTo = function(mode){
+    // 通常ユーザがアクセスできるのはmode_num個のモード
+    var mode_num = 3;
+    INFO.modeNumber = mode%mode_num;
+    INFO.mouseMode = INFO.mouseModes[INFO.modeNumber];
+}
+INFO.onKeyDown = function(e){
+    INFO.modeChanging = true;
+    if(e.shiftKey){
+        INFO.modeChangeTo(INFO.modeNumber+1);
+    }
+    else if (e.altKey){
+        INFO.modeChangeTo(INFO.modeNumber-1);
+    }
+}

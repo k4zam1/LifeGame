@@ -12,30 +12,22 @@ class GameObject {
         this.constructor.type = this.type;
     }
     draw(highlight=false){
-        var offset = 80;
+        var energish = 100;
+        var opacity = this.energy/energish + 0.5;
+        if(opacity > 1){
+            opacity = 1;
+        }
+
         var style = this.constructor.color;
         var color = style.color;
-        switch(this.type){
-            case "Carnivore":
-                color = style.makeGradation(this.energy-offset,0,0);
-                break;
-            case "Herbivores":
-                color = style.makeGradation(0,this.energy-offset,0);
-                break;
-            case "Bug":
-                color = style.makeGradation(0,this.energy-offset,0);
-                break;
-            case "Predator":
-                color = style.makeGradation(0,0,this.energy-offset);
-                break;
-            default :
-                color = style.color;
-        }
         if(highlight){
             color = "rgb(200,200,0)";
         }
+
+        INFO.context.globalAlpha = opacity;
         INFO.context.fillStyle = color;
         INFO.context.fillRect(this.x*INFO.cellSize+1,this.y*INFO.cellSize+1,INFO.cellSize-2,INFO.cellSize-2);
+        INFO.context.globalAlpha = 1;
     }
     hasOwnMethod(method) {
         return typeof this[method] == "function";

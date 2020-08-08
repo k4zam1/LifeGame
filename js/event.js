@@ -1,4 +1,3 @@
-
 // select
 var select = document.querySelector("#item");
 var options = document.querySelectorAll("#item option");
@@ -15,15 +14,7 @@ select.addEventListener("change",function(){
 });
 
 function keyDown(e){
-    INFO.modeChanging = true;
-    if(e.shiftKey){
-        INFO.modeNumber++;
-    }
-    else if (e.altKey){
-        INFO.modeNumber--;
-    }
-    INFO.modeNumber = INFO.modeNumber%3;
-    INFO.mouseMode = INFO.mouseModes[INFO.modeNumber];
+    INFO.onKeyDown(e);
 }
 
 function onDown(e){
@@ -32,115 +23,114 @@ function onDown(e){
             INFO.clickedObj = MAP.find(INFO.mousePoint.x,INFO.mousePoint.y);
             MAP.highlight = new Point(INFO.mousePoint.x,INFO.mousePoint.y);
             break;
-        case INFO.MODE_CREATE_WALL:
-            if(Wall.isLimit()){
-                return;
-            }
-            var IID = setInterval(function(){
-                // カーソルがキャンパス外に出た || mouseModeが変更されていた
-                if(INFO.mouseout ||  Wall.isLimit() || INFO.modeChanging){
-                    clearInterval(IID);
-                    INFO.modeChanging = (INFO.modeChanging) ? false : true;   
-                }
-                Wall.create(INFO.mousePoint);
-                
-                // クリックを終えたとき、処理を終了
-                INFO.canvas.onmouseup = function(e){
-                    if(e.button == 0) clearInterval(IID);
-                }
-            },20);
+        case INFO.MODE_SELECT_STAGE:
+            gameMenu.onMouseDown();
             break;
+        case INFO.MODE_CREATE_WALL:
         case INFO.MODE_DELETE_WALL:
-            var IID = setInterval(function(){
-                // カーソルがキャンパス外に出た || mouseModeが変更されていた
-                if(INFO.mouseout || INFO.modeChanging){
-                    clearInterval(IID);
-                    INFO.modeChanging = (INFO.modeChanging) ? false : true;
-                }
-                Wall.delete(INFO.mousePoint);
-                // クリックを終えたとき、処理を終了
-                INFO.canvas.onmouseup = function(e){
-                    if(e.button == 0) clearInterval(IID);
-                }
-            },20);
+            Wall.onMouseDown();
             break;
         case INFO.MODE_CREATE_BR:
-            if(INFO.tank < 30 || !INFO.putable) break;
-            INFO.tank -= 30;
-            
-            var x = INFO.mousePoint.x;
-            var y = INFO.mousePoint.y;
-            for(var i=0;i<2;i++){
-                for(var j=0;j<2;j++){
-                    var BR = new BreederReactor(x+i,y+j);
-                    MAP.register(BR);
-                }
-            }
-
-            INFO.modeNumber = INFO.MODE_INFORMATION;
-            INFO.bgContext.clearRect(0,0,INFO.canvas.width,INFO.canvas.height);
+            BreederReactor.onMouseDown();
             break;
-        default: break;
     }
 }
-
 function onUp(e){}
-function onClick(e){
-    switch(INFO.modeNumber){
-        case INFO.MODE_SELECT_STAGE:
-            if(gameMenu.over != -1){
-                INFO.STAGE = gameMenu.over;
-                INFO.modeNumber = INFO.MODE_INFORMATION;
-                INFO.mouseMode = INFO.mouseModes[INFO.modeNumber];
-            }
-            break;
-    }
-}
+function onClick(e){}
 function onOut(e){ INFO.mouseout = true;　}
 function onOver(e){
     INFO.mouseout = false;
-
-    // オブジェクトの選択候補ハイライトする
     switch(INFO.modeNumber){
         case INFO.MODE_CREATE_BR:
-            BreederReactor.highlight();
+            BreederReactor.onMouseOver();
             break;
         case INFO.MODE_CREATE_WALL:
-            Wall.highlight();
-            break;
         case INFO.MODE_DELETE_WALL:
-            Wall.highlight();
+            Wall.onMouseOver();
             break;
     }
-    
 }
 function onMove(e){
     // カーソルが動いた場合、キャンパス内のカーソルの座標を更新
-    INFO.mousePoint = new Point((Math.floor(e.offsetX/INFO.cellSize)),(Math.floor(e.offsetY/INFO.cellSize)));
-
-
-    // Itemの設置場所をハイライトする
+    INFO.mousePoint = new Point(
+        (Math.floor(e.offsetX/INFO.cellSize)),
+        (Math.floor(e.offsetY/INFO.cellSize)));
     INFO.bgContext.clearRect(0,0,INFO.canvas.width,INFO.canvas.height);
     switch(INFO.modeNumber){
         case INFO.MODE_SELECT_STAGE:
-            gameMenu.setHighlight(INFO.mousePoint);
+            gameMenu.onMouseMove();
             break;
         case INFO.MODE_CREATE_BR:
-            BreederReactor.updatePutable();
-            BreederReactor.highlight();
+            BreederReactor.onMouseMove();
             break;
         case INFO.MODE_CREATE_WALL:
-            Wall.updatePutable();
-            Wall.highlight();
-            break;
         case INFO.MODE_DELETE_WALL:
-            Wall.updatePutable();
-            INFO.putable = (INFO.putable) ? false : true;
-            Wall.highlight();
+            Wall.onMouseMove();
+            break;
     }
 }
 
-// イベント登録
+function onUpdate(e){
+    INFO.context.clearRect(0,0,INFO.canvas.width,INFO.canvas.height);
+    INFO.day += 1;
+    Plant.add();
+    Resource.add();
+    MAP.update();
+    INFO.box.update();
+    MAP.draw();
+
+}
+function onStageSelected(e){
+    try {
+        // 配信サーバーからステージを取得
+        STAGE_FILE_URL = "http://localhost:9000/api?query={}".format(INFO.STAGE);
+        d3.csv(STAGE_FILE_URL,function(error,stage){
+            if(error){
+                console.warn(error);
+            }
+            var CREATEFUNC = {
+                0 : function(p){ },
+                1 : function(p){ Wall.create(p) },
+                2 : function(p){ Red.randomSpawn(p) },
+                3 : function(p){ Blue.randomSpawn(p) },
+            }
+            for(var i=0; i<MAP.height; i++){
+                for(var j=0; j<MAP.width; j++){
+                    var blocktype = stage[i][j];
+                    var create = CREATEFUNC[blocktype];
+                    if(create){
+                        var point = new Point(j,i);
+                        create(point);
+                    }
+                }
+            }
+            Wall.soundon = true;
+            INFO.remainingWalls = 150;
+        });
+        gameLoop();
+    }
+    catch(e){
+        console.error(e);
+        return;
+    }
+}
+function onGameOver(){
+    var na = 0;
+    var np = 0;
+    for(var h=0;h<MAP.height;h++){
+        for(var w=0;w<MAP.width;w++){
+            if(MAP.map[h][w] == 0) continue;
+            if(MAP.map[h][w].type == "Red") na++;
+            if(MAP.map[h][w].type == "Blue") np++;
+        }
+    }
+    var text = (na >= np) ? "YOU WIN" : "YOU LOSE";
+    INFO.context.font = "48px serif";
+    INFO.context.fillStyle = 'rgb(255,255,0)';
+    INFO.context.fillText(text,INFO.canvas.height/2,INFO.canvas.width/2-50);
+}
+
+// ユーザー操作で発生するイベント
 document.onkeydown = keyDown;
 INFO.canvas.addEventListener('mousedown', onDown, false);
 INFO.canvas.addEventListener('mouseup', onUp, false);
@@ -148,3 +138,8 @@ INFO.canvas.addEventListener('click', onClick, false);
 INFO.canvas.addEventListener('mouseover', onOver, false);
 INFO.canvas.addEventListener('mouseout', onOut, false);
 INFO.canvas.addEventListener('mousemove',onMove,false);
+
+// ゲームロジックで発行されるイベント
+INFO.canvas.addEventListener('update',onUpdate,false);
+INFO.canvas.addEventListener('stageselected',onStageSelected,true);
+INFO.canvas.addEventListener('gameover',onGameOver,true);
