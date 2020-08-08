@@ -1,4 +1,4 @@
-# lifegame <ライフゲーム>
+# ?LIFE GAME?
 
 ## Install
 pip install -r requirements.txt
