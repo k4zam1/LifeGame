@@ -7,6 +7,7 @@ class Wall extends Item {
     static period = INFO.finish+1;
     static size = "1x1";
     static soundon = false;
+
     static create(p){
         var success = super.create(p);
         if(success){
@@ -21,6 +22,10 @@ class Wall extends Item {
         var success = super.delete.call(this,p);
         if(success){
             INFO.remainingWalls++;
+            if(Wall.soundon){
+                var snd = new Audio("sound/se_wall_delete.mp3");
+                snd.play();
+            }
         }
     }
     static isLimit(){
@@ -122,7 +127,8 @@ class BreederReactor  extends Item {
                 MAP.register(BR);
             }
         }
-
+        var snd = new Audio("sound/se_reactor.mp3");
+        snd.play();
         INFO.modeChangeTo(INFO.MODE_INFORMATION);
         INFO.bgContext.clearRect(0,0,INFO.canvas.width,INFO.canvas.height);
     }

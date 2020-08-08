@@ -48,7 +48,7 @@ class Item extends GameObject {
             var newObj = new this(p.x,p.y);
             MAP.register(newObj);
             return 1;
-        } 
+        }
         return 0;
     }
     static delete(p){

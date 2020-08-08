@@ -70,16 +70,6 @@ function onMove(e){
     }
 }
 
-function onUpdate(e){
-    INFO.context.clearRect(0,0,INFO.canvas.width,INFO.canvas.height);
-    INFO.day += 1;
-    Plant.add();
-    Resource.add();
-    MAP.update();
-    INFO.box.update();
-    MAP.draw();
-
-}
 function onStageSelected(e){
     try {
         // 配信サーバーからステージを取得
@@ -113,6 +103,16 @@ function onStageSelected(e){
         console.error(e);
         return;
     }
+}
+function onUpdate(e){
+    INFO.context.clearRect(0,0,INFO.canvas.width,INFO.canvas.height);
+    INFO.day += 1;
+    Plant.add();
+    Resource.add();
+    MAP.update();
+    INFO.box.update();
+    MAP.draw();
+
 }
 function onGameOver(){
     var na = 0;
