@@ -2,20 +2,12 @@
 <meta charset="utf-8">
 <title>LIFE GAME</title>
 <link rel="stylesheet" type="text/css" href="style.css"/>
-<body>
+<body onload="main();">
     <div id="app">
         <canvas id="canvas" width="640" height="480"></canvas>
         <canvas id="background" width="640" height="480"></canvas>
         <div id="informationBox">
-            <div id="info">
-                <form id="species">
-                    <input name="name" type="radio" value="Animal" checked="checked"> Animal　
-                    <input name="name" type="radio" value="Predator"> Predator
-                </form>
-                <form id="stageSelect">
-                    <input name="stageFile" type="file"/>
-                </form>
-            </div>
+            <div id="info"></div>
             <div id="speed">
                 S <input id="gameSpeedSlider" type="range" name="speed" min="0" max="1000" oninput="INFO.gameSpeed = 1000 - this.value;" > F
             </div>
@@ -23,7 +15,6 @@
                 <option value="none">----</option>
                 <option value="breederReactor">増殖炉</option>
             </select>
-
             <div class="container add-control">
                 <input type="radio" id="modeC" class="radio" name="tab" checked="checked"><label class="tab-title titleC" for="modeC">create</label>
                 <input type="radio" id="modeB" class="radio" name="tab" ><label class="tab-title titleB" for="modeB">break</label>
@@ -55,14 +46,14 @@
                     </div>
                 </div>
         </div>
-
     </div>
+    <script src="js/globals.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="lib/lib_core.js"></script>
+    <script src="lib/lib_menu.js"></script>  
     <script src="lib/lib_point.js"></script>
     <script src="lib/lib_color.js"></script>
-    <script src="lib/lib_map.js"></script>
-
-    <script src="js/globals.js"></script>
+    <script src="lib/lib_map.js"></script>  
     <script src="js/html_generator.js"></script>
     <script src="js/objects_interface.js"></script>
     <script src="js/objects_implement.js"></script>
@@ -70,6 +61,4 @@
     <script src="js/stage.js"></script>
     <script src="js/main.js"></script>
     <script src="js/stage.js"></script>
-    <br/>
-    <input type="button" value="Start" onclick="main();"/>
 </body>

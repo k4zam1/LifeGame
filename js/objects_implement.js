@@ -7,6 +7,7 @@ class Wall extends Item {
     static cost = 1;
     static period = INFO.finish+1;
     static size = "1x1";
+    static soundon = false;
     static isLimit(){
         return (INFO.remainingWalls < 0);
     }
@@ -14,6 +15,10 @@ class Wall extends Item {
         var success = super.create(p);
         if(success){
             INFO.remainingWalls--;
+            if(Wall.soundon){
+                var snd = new Audio("sound/se_wall.mp3");
+                snd.play();
+            }
         }
     }
     static delete(p){
@@ -63,7 +68,7 @@ class BreederReactor  extends Item {
         // 生物を増殖させる
         var sp = MAP.getBlankPoint(this.x,this.y);
         if(sp){
-            Carnivore.randomSpawn(sp);
+            Red.randomSpawn(sp);
         }
     }
 }
@@ -114,41 +119,13 @@ class Plant extends GameObject {
 /*---------------------------------------------------------------------------------------*
  *  bio
  *---------------------------------------------------------------------------------------*/
-
-/*
-// 虫
-class Bug extends Organism {
-    static color = new Color(140,255,50);
-    static edibles = ["Plant","Resource"];
-    static energyInc = 10;
-    static reproduction_energy = 0;
-    static reproduction_interval = 1;
-}
-
-// 草食動物
-class Herbivores extends Organism {
-    static color = new Color(200,100,50);
-    static edibles = ["Bug","Plant"];
-    static energyInc = 7;
-    static reproduction_energy = 15;
-    static reproduction_interval = 10;
-}
-
-*/
-
-// 肉食動物
-class Carnivore extends Organism {
-    static color = new Color(200,50,200);
+class Red extends Organism {
+    static color = new Color(250,50,50);
     static edibles = ["Plant","Resource"];
     static energyInc = 10;
     static reproduction_energy = 10;
     static reproduction_interval = 5;
 }
-
-class Predator extends Organism {
+class Blue extends Red {
     static color = new Color(50,50,250);
-    static edibles = ["Plant","Resource"];
-    static energyInc = 10;
-    static reproduction_energy = 15;
-    static reproduction_interval = 5;
 }

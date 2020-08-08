@@ -51,7 +51,6 @@ function onDown(e){
             },20);
             break;
         case INFO.MODE_DELETE_WALL:
-            console.log("delete mode");
             var IID = setInterval(function(){
                 // カーソルがキャンパス外に出た || mouseModeが変更されていた
                 if(INFO.mouseout || INFO.modeChanging){
@@ -86,12 +85,22 @@ function onDown(e){
 }
 
 function onUp(e){}
-function onClick(e){}
+function onClick(e){
+    switch(INFO.modeNumber){
+        case INFO.MODE_SELECT_STAGE:
+            if(gameMenu.over != -1){
+                INFO.STAGE = gameMenu.over;
+                INFO.modeNumber = INFO.MODE_INFORMATION;
+                INFO.mouseMode = INFO.mouseModes[INFO.modeNumber];
+            }
+            break;
+    }
+}
 function onOut(e){ INFO.mouseout = true;　}
 function onOver(e){
     INFO.mouseout = false;
 
-    // 設置場所をハイライトする
+    // オブジェクトの選択候補ハイライトする
     switch(INFO.modeNumber){
         case INFO.MODE_CREATE_BR:
             BreederReactor.highlight();
@@ -113,6 +122,9 @@ function onMove(e){
     // Itemの設置場所をハイライトする
     INFO.bgContext.clearRect(0,0,INFO.canvas.width,INFO.canvas.height);
     switch(INFO.modeNumber){
+        case INFO.MODE_SELECT_STAGE:
+            gameMenu.setHighlight(INFO.mousePoint);
+            break;
         case INFO.MODE_CREATE_BR:
             BreederReactor.updatePutable();
             BreederReactor.highlight();

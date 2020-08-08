@@ -1,5 +1,6 @@
 
 // ステージの追加
+/*
 var STAGE = document.getElementById("stageSelect");
 var stageLayout = [];   // 二次元配列を入れるための配列
 STAGE.stageFile.addEventListener("change", function(e) {
@@ -23,6 +24,7 @@ STAGE.stageFile.addEventListener("change", function(e) {
         }
     })
 })
+*/
 
 function createStage(){
     var CREATEFUNC = {
