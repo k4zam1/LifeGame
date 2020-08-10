@@ -1,17 +1,3 @@
-// select
-var select = document.querySelector("#item");
-var options = document.querySelectorAll("#item option");
-select.addEventListener("change",function(){
-    // 選択されたoption番号を取得
-    var selectedItem = options[this.selectedIndex].value;
-    switch(selectedItem){
-        case "breederReactor":
-            INFO.modeNumber = INFO.MODE_CREATE_BR;
-            break;
-        default : break;
-    }
-    this.selectedIndex = 0;
-});
 
 function keyDown(e){
     INFO.onKeyDown(e);
@@ -22,6 +8,8 @@ function onDown(e){
         case INFO.MODE_INFORMATION:
             INFO.clickedObj = MAP.find(INFO.mousePoint.x,INFO.mousePoint.y);
             MAP.highlight = new Point(INFO.mousePoint.x,INFO.mousePoint.y);
+            var snd = new Audio("sound/se_select.mp3");
+            snd.play();
             break;
         case INFO.MODE_SELECT_STAGE:
             gameMenu.onMouseDown();
@@ -79,7 +67,7 @@ function onStageSelected(e){
                 console.warn(error);
             }
             var CREATEFUNC = {
-                0 : function(p){ },
+                0 : function(p){  /* empty */  },
                 1 : function(p){ Wall.create(p) },
                 2 : function(p){ Red.randomSpawn(p) },
                 3 : function(p){ Blue.randomSpawn(p) },
@@ -112,7 +100,6 @@ function onUpdate(e){
     MAP.update();
     INFO.box.update();
     MAP.draw();
-
 }
 function onGameOver(){
     var na = 0;
@@ -130,14 +117,26 @@ function onGameOver(){
     INFO.context.fillText(text,INFO.canvas.height/2,INFO.canvas.width/2-50);
 }
 
+function onItemSelected(e){
+    var selectedItem = e.target.value;
+    switch(selectedItem){
+        case "breederReactor":
+            INFO.modeNumber = INFO.MODE_CREATE_BR;
+            break;
+        default : break;
+    }
+}
+
 // ユーザー操作で発生するイベント
-document.onkeydown = keyDown;
 INFO.canvas.addEventListener('mousedown', onDown, false);
 INFO.canvas.addEventListener('mouseup', onUp, false);
 INFO.canvas.addEventListener('click', onClick, false);
 INFO.canvas.addEventListener('mouseover', onOver, false);
 INFO.canvas.addEventListener('mouseout', onOut, false);
 INFO.canvas.addEventListener('mousemove',onMove,false);
+document.onkeydown = keyDown;
+var itemOptions = document.querySelector("#item");
+itemOptions.addEventListener("change",onItemSelected);
 
 // ゲームロジックで発行されるイベント
 INFO.canvas.addEventListener('update',onUpdate,false);

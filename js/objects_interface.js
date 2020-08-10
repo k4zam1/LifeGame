@@ -34,6 +34,19 @@ class GameObject {
     }
 }
 
+
+class Spontaneous extends GameObject {    
+    static add(area=false){
+        var p = Point.getRandomPoint(area);
+        var found = MAP.find(p.x,p.y);
+        if(!found){
+            var spawn = new this(p.x,p.y);
+            MAP.register(spawn);
+        }
+    }
+}
+
+
 class Item extends GameObject {
     static cost = 0;
     static period = 0;
@@ -62,14 +75,29 @@ class Item extends GameObject {
     // highlight関係
     static updatePutable(){
         INFO.putable = true;
-        var found = MAP.find(INFO.mousePoint.x,INFO.mousePoint.y);
-        if(found && found.type == "Wall"){
-            INFO.putable = false;
+        var x = INFO.mousePoint.x;
+        var y = INFO.mousePoint.y;
+        var wide = parseInt(this.size[0]);
+        var high = parseInt(this.size[2]);
+        for(var w=0;w<wide;w++){
+            for(var h=0;h<high;h++){
+                var found = MAP.find(x+w,y+h);
+                if(found){
+                    INFO.putable = false;
+                    break;
+                }
+            }
         }
     }
     static highlight(){
+        var wide = parseInt(this.size[0]);
+        var high = parseInt(this.size[2]);
         INFO.bgContext.fillStyle = (INFO.putable) ? "rgb(200,200,0)":"rgb(200,50,50)";
-        INFO.bgContext.fillRect(INFO.mousePoint.x*INFO.cellSize+1,INFO.mousePoint.y*INFO.cellSize+1,INFO.cellSize-2,INFO.cellSize-2);
+        INFO.bgContext.fillRect(
+            INFO.mousePoint.x*INFO.cellSize+1,
+            INFO.mousePoint.y*INFO.cellSize+1,
+            INFO.cellSize*wide-2,
+            INFO.cellSize*high-2);
     }
 
     update(){
@@ -83,10 +111,10 @@ class Item extends GameObject {
 
 class Organism extends GameObject {
     static color = new Color(0,0,0);
-    static edibles = [];
-    static energyInc = 0;
-    static reproduction_energy = 100;
-    static reproduction_interval = 1;
+    static edibles = ["Plant","Resource"];
+    static energyInc = 10;
+    static reproduction_energy = 10;
+    static reproduction_interval = 5;
 
     constructor(x,y,energy,direction,genes){
         super(x,y);

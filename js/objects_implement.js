@@ -1,6 +1,6 @@
 
 /*---------------------------------------------------------------------------------------*
- *  Wall
+ *  Item :: Wall,Reactor
  *---------------------------------------------------------------------------------------*/
 class Wall extends Item {
     static cost = 1;
@@ -39,9 +39,8 @@ class Wall extends Item {
 
     static onMouseMove(){
         this.updatePutable();
-        if(INFO.modeNumber == INFO.MODE_DELETE_WALL){
-            INFO.putable = (INFO.putable) ? false : true;
-        }
+        var reverse  = (INFO.modeNumber == INFO.MODE_DELETE_WALL);
+        INFO.putable = (reverse) ? !INFO.putable : INFO.putable;
         this.highlight();
     }
 
@@ -74,14 +73,10 @@ class Wall extends Item {
     }
 }
 
-/*---------------------------------------------------------------------------------------*
- *  BreederReactor
- *---------------------------------------------------------------------------------------*/
-
 class BreederReactor  extends Item {
     static cost = 100;
     static period = 100;
-    static size = "4x4";
+    static size = "2x2";
     static color = new Color(240,90,240);
 
     constructor(x,y){
@@ -89,31 +84,13 @@ class BreederReactor  extends Item {
         this.published = INFO.day;
     }
     
-    static updatePutable(){
-        INFO.putable = true;
-        var x = INFO.mousePoint.x;
-        var y = INFO.mousePoint.y;
-        for(var i=0;i<2;i++){
-            for(var j=0;j<2;j++){
-                var found = MAP.find(x+i,y+j);
-                if(found && found.type == "Wall"){
-                    INFO.putable = false;
-                }
-            }
-        }
-    }
-    static highlight(){
-        INFO.bgContext.fillStyle = (INFO.putable) ? "rgb(200,200,0)":"rgb(200,50,50)";
-        INFO.bgContext.fillRect(INFO.mousePoint.x*INFO.cellSize+1,INFO.mousePoint.y*INFO.cellSize+1,INFO.cellSize*2-2,INFO.cellSize*2-2);
-    }
-
     // mouse modeがBreederReactorのもののとき
     static onMouseMove(){
-        BreederReactor.updatePutable();
-        BreederReactor.highlight();
+        this.updatePutable();
+        this.highlight();
     }
     static onMouseOver(){
-        BreederReactor.highlight();
+        this.highlight();
     }
     static onMouseDown(){
         if(INFO.tank < 30 || !INFO.putable) return;
@@ -136,8 +113,6 @@ class BreederReactor  extends Item {
     // non static method
     update(){
         super.update();
-
-        // 生物を増殖させる
         var sp = MAP.getBlankPoint(this.x,this.y);
         if(sp){
             Red.randomSpawn(sp);
@@ -148,55 +123,27 @@ INFO.items = [Wall,BreederReactor];
 
 
 /*---------------------------------------------------------------------------------------*
- *  Resource
+ *  Spontaneous :: Resource,Plant
  *---------------------------------------------------------------------------------------*/
-class Resource extends GameObject {
+class Resource extends Spontaneous {
     static color = new Color(250,250,0);
-    static add(){
-        var p = Point.getRandomPoint();
-        var found = MAP.find(p.x,p.y);
-        if(!found){
-            var r = new Resource(p.x,p.y);
-            MAP.register(r);
-        }
-    }
 }
-
-
-
-/*---------------------------------------------------------------------------------------*
- *  Plant
- *---------------------------------------------------------------------------------------*/
-
-var PLANT_AREAS_NUM = 10;
-var PLANT_AREAS = [];
-for(var i=0; i < PLANT_AREAS_NUM; i++){
-    PLANT_AREAS.push(MAP.getRandomArea());
-}
-
-class Plant extends GameObject {
+class Plant extends Spontaneous {
     static color = new Color(0,200,0);
+    static areas_num = 10;
+    static areas = Array.from(new Array(this.areas_num), () => MAP.getRandomArea());
     static add(){
-        for(var area of PLANT_AREAS){
-            var p = Point.getRandomPoint(area);
-            var found = MAP.find(p.x,p.y);
-            if(!found){
-                MAP.register(new Plant(p.x,p.y));
-            }
+        for(var area of this.areas){
+            super.add(area);
         }
     }
 }
 
-
 /*---------------------------------------------------------------------------------------*
- *  bio
+ *  Organism :: Red,Blue
  *---------------------------------------------------------------------------------------*/
 class Red extends Organism {
     static color = new Color(250,50,50);
-    static edibles = ["Plant","Resource"];
-    static energyInc = 10;
-    static reproduction_energy = 10;
-    static reproduction_interval = 5;
 }
 class Blue extends Red {
     static color = new Color(50,50,250);
