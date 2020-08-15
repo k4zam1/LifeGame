@@ -2,11 +2,18 @@
 /*---------------------------------------------------------------------------------------*
  *  Item :: Wall,Reactor
  *---------------------------------------------------------------------------------------*/
+/*
+    ItemオブジェクトにはonEventメソッドがある
+    Itemオブジェクトにはcreate,deleteの2つのモードがあり,
+    onEventメソッドの内部で分岐するように実装する
+*/
 class Wall extends Item {
     static cost = 1;
     static period = INFO.finish+1;
     static size = "1x1";
     static soundon = false;
+    static create_mode = IDAllocator.allocate();
+    static delete_mode = IDAllocator.allocate();
 
     static create(p){
         var success = super.create(p);
@@ -33,14 +40,11 @@ class Wall extends Item {
     }
 
     // mouse modeがWallのもののとき
-    static onMouseOver(){
-        this.highlight();
-    }
-
     static onMouseMove(){
         this.updatePutable();
-        var reverse  = (INFO.modeNumber == INFO.MODE_DELETE_WALL);
+        var reverse  = (INFO.modeNumber == Wall.delete_mode);
         INFO.putable = (reverse) ? !INFO.putable : INFO.putable;
+
         this.highlight();
     }
 
@@ -48,7 +52,7 @@ class Wall extends Item {
         var IID = setInterval(function(){
             // 以下終了判定
             // つくれる壁が上限になった
-            if(INFO.modeNumber == INFO.MODE_CREATE_WALL && Wall.isLimit()){
+            if(INFO.modeNumber == Wall.create_mode && Wall.isLimit()){
                 return;
             }
             // クリックを終えた
@@ -63,10 +67,10 @@ class Wall extends Item {
 
 
             // 以下ondown時の処理
-            if(INFO.modeNumber == INFO.MODE_CREATE_WALL){
+            if(INFO.modeNumber == Wall.create_mode){
                 Wall.create(INFO.mousePoint);
             }
-            else {
+            else if(INFO.modeNumber == Wall.delete_mode){
                 Wall.delete(INFO.mousePoint);
             }
         },20);
@@ -74,16 +78,20 @@ class Wall extends Item {
 }
 
 class BreederReactor  extends Item {
-    static cost = 100;
+    static cost = 30;
     static period = 100;
     static size = "2x2";
     static color = new Color(240,90,240);
-
+    static create_mode = IDAllocator.allocate();
+    static delete_mode = null;
+    static type = "BreederReactor";
+    
     constructor(x,y){
         super(x,y);
         this.published = INFO.day;
     }
     
+    // BRはcreateのみ
     // mouse modeがBreederReactorのもののとき
     static onMouseMove(){
         this.updatePutable();
@@ -93,8 +101,8 @@ class BreederReactor  extends Item {
         this.highlight();
     }
     static onMouseDown(){
-        if(INFO.tank < 30 || !INFO.putable) return;
-        INFO.tank -= 30;
+        if(INFO.tank < this.cost || !INFO.putable) return;
+        INFO.tank -= this.cost;
         
         var x = INFO.mousePoint.x;
         var y = INFO.mousePoint.y;
@@ -119,8 +127,50 @@ class BreederReactor  extends Item {
         }
     }
 }
+// Item追加時に変更しなければいけないところ
 INFO.items = [Wall,BreederReactor];
-
+INFO.items.__callEvent = function(callback){
+    for(var item of INFO.items){
+        if(INFO.modeNumber == item.create_mode || INFO.modeNumber == item.delete_mode){
+            try {
+                callback(item);
+            }
+            catch(e){
+                console.error(e.name);
+                return;
+            }
+        }
+    }
+}
+INFO.items.onMouseDown = function(){
+    INFO.items.__callEvent(function(item){ item.onMouseDown(); });
+}
+INFO.items.onMouseOver = function(){
+    INFO.items.__callEvent(function(item){ item.onMouseOver(); });
+}
+INFO.items.onMouseMove = function(){
+    INFO.items.__callEvent(function(item){ item.onMouseMove(); });
+}
+INFO.items.setCreateMode = function(selectedItem){
+    for(var item of INFO.items){
+        if(item.type == selectedItem){
+            INFO.modeChangeTo(item.create_mode);
+        }
+    }
+}
+INFO.items.eventHandler = function(e){
+    switch(e.type){
+    case "mousedown":
+        INFO.items.onMouseDown();
+        break;
+    case "mouseover":
+        INFO.items.onMouseOver();
+        break;
+    case "mousemove":
+        INFO.items.onMouseMove();
+        break;
+    }
+}
 
 /*---------------------------------------------------------------------------------------*
  *  Spontaneous :: Resource,Plant
@@ -128,6 +178,7 @@ INFO.items = [Wall,BreederReactor];
 class Resource extends Spontaneous {
     static color = new Color(250,250,0);
 }
+
 class Plant extends Spontaneous {
     static color = new Color(0,200,0);
     static areas_num = 10;
@@ -147,4 +198,11 @@ class Red extends Organism {
 }
 class Blue extends Red {
     static color = new Color(50,50,250);
+}
+class Eater extends Organism {
+    static color = new Color(50,250,50);
+    constructor(x,y,energy,direction,genes,edibles=[]){
+        super(x,y,energy,direction,genes);
+        this.constructor.edibles = edibles;
+    }
 }

@@ -25,29 +25,26 @@ INFO.screenIID = 0;
 
 // マウス関連
 INFO.MODE_SELECT_STAGE = -1;
-INFO.MODE_INFORMATION = 0;
-INFO.MODE_CREATE_WALL = 1;
-INFO.MODE_DELETE_WALL = 2;
-INFO.MODE_CREATE_BR = 3;
+INFO.MODE_INFORMATION = IDAllocator.allocate();
 INFO.mouseout = false;
 INFO.mousePoint = null;
 INFO.mode = "information";
 INFO.mouseModes = ["information","createWall","breakWall"];
 INFO.modeNumber = INFO.MODE_SELECT_STAGE;
+
 INFO.modeChanging = false;
 INFO.mouseMode = INFO.mouseModes[INFO.modeNumber];
 INFO.modeChangeTo = function(mode){
-    // 通常ユーザがアクセスできるのはmode_num個のモード
-    var mode_num = 3;
-    INFO.modeNumber = mode%mode_num;
+    INFO.modeNumber = mode;
     INFO.mouseMode = INFO.mouseModes[INFO.modeNumber];
 }
 INFO.onKeyDown = function(e){
+    var mode_num = 3;
     INFO.modeChanging = true;
     if(e.shiftKey){
-        INFO.modeChangeTo(INFO.modeNumber+1);
+        INFO.modeChangeTo((INFO.modeNumber+1)%mode_num);
     }
     else if (e.altKey){
-        INFO.modeChangeTo(INFO.modeNumber-1);
+        INFO.modeChangeTo((INFO.modeNumber-1)%mode_num);
     }
 }

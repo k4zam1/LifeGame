@@ -5,22 +5,15 @@ function keyDown(e){
 
 function onDown(e){
     switch(INFO.modeNumber){
-        case INFO.MODE_INFORMATION:
-            INFO.clickedObj = MAP.find(INFO.mousePoint.x,INFO.mousePoint.y);
-            MAP.highlight = new Point(INFO.mousePoint.x,INFO.mousePoint.y);
-            var snd = new Audio("sound/se_select.mp3");
-            snd.play();
-            break;
-        case INFO.MODE_SELECT_STAGE:
-            gameMenu.onMouseDown();
-            break;
-        case INFO.MODE_CREATE_WALL:
-        case INFO.MODE_DELETE_WALL:
-            Wall.onMouseDown();
-            break;
-        case INFO.MODE_CREATE_BR:
-            BreederReactor.onMouseDown();
-            break;
+    case INFO.MODE_INFORMATION:
+        INFO.clickedObj = MAP.find(INFO.mousePoint.x,INFO.mousePoint.y);
+        MAP.highlight = new Point(INFO.mousePoint.x,INFO.mousePoint.y);
+        var snd = new Audio("sound/se_select.mp3");
+        snd.play();
+        break;
+    default:
+        gameMenu.eventHandler(e);
+        INFO.items.eventHandler(e);
     }
 }
 function onUp(e){}
@@ -28,15 +21,7 @@ function onClick(e){}
 function onOut(e){ INFO.mouseout = true;　}
 function onOver(e){
     INFO.mouseout = false;
-    switch(INFO.modeNumber){
-        case INFO.MODE_CREATE_BR:
-            BreederReactor.onMouseOver();
-            break;
-        case INFO.MODE_CREATE_WALL:
-        case INFO.MODE_DELETE_WALL:
-            Wall.onMouseOver();
-            break;
-    }
+    INFO.items.eventHandler(e);
 }
 function onMove(e){
     // カーソルが動いた場合、キャンパス内のカーソルの座標を更新
@@ -44,18 +29,8 @@ function onMove(e){
         (Math.floor(e.offsetX/INFO.cellSize)),
         (Math.floor(e.offsetY/INFO.cellSize)));
     INFO.bgContext.clearRect(0,0,INFO.canvas.width,INFO.canvas.height);
-    switch(INFO.modeNumber){
-        case INFO.MODE_SELECT_STAGE:
-            gameMenu.onMouseMove();
-            break;
-        case INFO.MODE_CREATE_BR:
-            BreederReactor.onMouseMove();
-            break;
-        case INFO.MODE_CREATE_WALL:
-        case INFO.MODE_DELETE_WALL:
-            Wall.onMouseMove();
-            break;
-    }
+    gameMenu.eventHandler(e);
+    INFO.items.eventHandler(e);
 }
 
 function onStageSelected(e){
@@ -119,12 +94,7 @@ function onGameOver(){
 
 function onItemSelected(e){
     var selectedItem = e.target.value;
-    switch(selectedItem){
-        case "breederReactor":
-            INFO.modeNumber = INFO.MODE_CREATE_BR;
-            break;
-        default : break;
-    }
+    INFO.items.setCreateMode(selectedItem);
 }
 
 // ユーザー操作で発生するイベント

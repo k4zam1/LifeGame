@@ -2,7 +2,6 @@
 // セルに配置するクラスに継承する
 class GameObject {
     static color = new Color(60,60,60);
-
     constructor(x,y){
         this.id = IDAllocator.allocate();
         this.x = x;
@@ -14,16 +13,9 @@ class GameObject {
     draw(highlight=false){
         var energish = 100;
         var opacity = this.energy/energish + 0.5;
-        if(opacity > 1){
-            opacity = 1;
-        }
-
+        opacity = (opacity > 1) ? 1:opacity;
         var style = this.constructor.color;
-        var color = style.color;
-        if(highlight){
-            color = "rgb(200,200,0)";
-        }
-
+        var color = (highlight) ? "rgb(200,200,0)":style.color;
         INFO.context.globalAlpha = opacity;
         INFO.context.fillStyle = color;
         INFO.context.fillRect(this.x*INFO.cellSize+1,this.y*INFO.cellSize+1,INFO.cellSize-2,INFO.cellSize-2);
@@ -51,9 +43,19 @@ class Item extends GameObject {
     static cost = 0;
     static period = 0;
     static size = "0x0";
+
     constructor(x,y){
         super(x,y);
         this.published = INFO.day;
+    }
+    static onMouseMove(){
+        throw NotImplementedError;
+    }
+    static onMouseOver(){
+        throw NotImplementedError;
+    }
+    static onMouseDown(){
+        throw NotImplementedError;
     }
     static create(p){
         var found = MAP.find(p.x,p.y);
@@ -72,7 +74,6 @@ class Item extends GameObject {
         }
         return 0;
     }
-    // highlight関係
     static updatePutable(){
         INFO.putable = true;
         var x = INFO.mousePoint.x;
@@ -99,7 +100,6 @@ class Item extends GameObject {
             INFO.cellSize*wide-2,
             INFO.cellSize*high-2);
     }
-
     update(){
         // 期限が来たら壊す
         if(INFO.day - this.published >= this.constructor.period){
