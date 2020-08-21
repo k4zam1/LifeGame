@@ -48,3 +48,8 @@ INFO.onKeyDown = function(e){
         INFO.modeChangeTo((INFO.modeNumber-1)%mode_num);
     }
 }
+
+
+// デフォルトではitemCreateがactive
+INFO.ctab = $(".bl_tab_itemCreate");
+INFO.dtab = $(".bl_tab_itemDelete");

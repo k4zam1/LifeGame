@@ -251,3 +251,11 @@ body {
     border-bottom-color: #fff;
     border-right-color: #666;
 }
+
+
+.bl_tab {
+    visibility: hidden;
+}
+.is_active {
+    visibility: visible;
+}

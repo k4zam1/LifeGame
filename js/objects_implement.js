@@ -14,6 +14,7 @@ class Wall extends Item {
     static soundon = false;
     static create_mode = IDAllocator.allocate();
     static delete_mode = IDAllocator.allocate();
+    static type = "Wall";
 
     static create(p){
         var success = super.create(p);

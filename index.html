@@ -2,6 +2,12 @@
 <meta charset="utf-8">
 <title>LIFE GAME</title>
 <link rel="stylesheet" type="text/css" href="style.css"/>
+<link type="text/css" rel="stylesheet"
+  href="http://code.jquery.com/ui/1.10.3/themes/cupertino/jquery-ui.min.css" />
+<script type="text/javascript"
+  src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script type="text/javascript"
+  src="http://code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>
 <body onload="main();">
     <div id="app">
         <canvas id="canvas" width="640" height="480"></canvas>
@@ -16,36 +22,10 @@
                 <option value="BreederReactor">増殖炉</option>
                 <!-- Item追加時に変更しなければいけないところ -->
             </select>
-            <div class="container add-control">
-                <input type="radio" id="modeC" class="radio" name="tab" checked="checked"><label class="tab-title titleC" for="modeC">create</label>
-                <input type="radio" id="modeB" class="radio" name="tab" ><label class="tab-title titleB" for="modeB">break</label>
-                    <div class="tab-body">
-                        <div class="create">
-                            <div class="itemCreate">
-                            <input type="radio" id="itemC1" class="radio" name="itemC" checked="checked"><label class="itemC-name itemC-name1" for="itemC1">壁</label>
-                            <input type="radio" id="itemC2" class="radio" name="itemC" ><label class="itemC-name itemC-name2" for="itemC2">増殖炉</label>
-                            <input type="radio" id="itemC3" class="radio" name="itemC" ><label class="itemC-name itemC-name3" for="itemC3">その他</label>
-                                <div class="itemC-body">
-                                    <div class="bodyC1" id="bodyC">説明文</div>
-                                    <div class="bodyC2" id="bodyC">説明文</div>
-                                    <div class="bodyC3" id="bodyC">説明文</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="break">
-                            <div class="itemBreak">
-                            <input type="radio" id="itemB1" class="radio" name="itemB" checked="checked"><label class="itemB-name itemB-name1" for="itemB1">壁</label>
-                            <input type="radio" id="itemB2" class="radio" name="itemB" ><label class="itemB-name itemB-name2" for="itemB2">その他</label>
-                            <input type="radio" id="itemB3" class="radio" name="itemB" ><label class="itemB-name itemB-name3" for="itemB3">その他</label>
-                                <div class="itemB-body">
-                                    <div class="bodyB1" id="bodyB">説明文</div>
-                                    <div class="bodyB2" id="bodyB">説明文</div>
-                                    <div class="bodyB3" id="bodyB">説明文</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="bl_tab">
+                <div class="bl_tab_itemCreate"></div>
+                <div class="bl_tab_itemDelete"></div>
+            </div>
         </div>
     </div>
     <script src="http://d3js.org/d3.v3.min.js"></script>
