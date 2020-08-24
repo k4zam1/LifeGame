@@ -9,26 +9,15 @@
         <canvas id="canvas" width="640" height="480"></canvas>
         <canvas id="background" width="640" height="480"></canvas>
         <div id="informationBox">
-            <!--
-            <div class="ly_info"></div>
-            S <input id="gameSpeedSlider" type="range" min="0" max="1000" oninput="INFO.gameSpeed = 1000 - this.value;" > F
-            <select class="el_item">
-                <option value="none">----</option>
-                <option value="BreederReactor">増殖炉</option>
-            </select>
-            -->  
-            <ul class="tab">
-              <li class="active">information</li>
+            <ul class="bl_tabs">
+              <li class="is_active">information</li>
               <li>create</li>
               <li>break</li>
             </ul>
-
-            <div class="mode">
+            <div class="bl_tab_contents">
               <ul class="show">
-                <div id="el_textBox"></div>
-                <div id="speed">
-                    S <input id="gameSpeedSlider" type="range" name="speed" min="0" max="1000" oninput="INFO.gameSpeed = 1000 - this.value;" > F
-                </div>
+                <div class="el_textBox"></div>
+                <div class="el_speedBar"></div>
               </ul>
               <ul class="bl_mode_create"></ul>
               <ul class="bl_mode_delete"></ul>
@@ -44,7 +33,6 @@
     <script src="js/html_generator.js"></script>
     <script src="js/objects_interface.js"></script>
     <script src="js/objects_implement.js"></script>
-    <script src="js/event_tab.js"></script>
     <script src="js/event.js"></script>
     <script src="js/main.js"></script>
 </body>
