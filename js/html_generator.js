@@ -1,7 +1,7 @@
 
 // ATOMを使うものはここに書く
 class InnerHTMLGenerator {
-    static textbox = document.getElementById("info");
+    static textbox = document.getElementById("el_textBox");
     constructor(){
         this.info = {
             "day":INFO.day,

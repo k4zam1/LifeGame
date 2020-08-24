@@ -6,14 +6,19 @@ function main(){
         if(INFO.modeNumber != INFO.MODE_SELECT_STAGE){
             clearInterval(menuScreenIID);
             // item
-            $(".bl_tab_itemCreate").addClass("is_active");
-            INFO.ctab.tabs();
-            INFO.dtab.tabs();
-            INFO.ctab.tabs('refresh');
-            for(var item of INFO.items){
-                INFO.ctab.append('<li>' + item.type + '</li>');
-                INFO.ctab.tabs('refresh');
-            }
+            $.each(INFO.items,function(idx,items){
+                var li = $("<button>")
+                    .attr("class","el_btn")
+                    .attr("value",items.type)
+                    .on("click",onItemSelected)
+                    .text(items.type);
+                INFO.ctab.append(li);
+            });
+            var li = $("<button>")
+                    .attr("class","el_btn")
+                    .attr("value","Wall")
+                    .text("Wall");
+            INFO.dtab.append(li);
             INFO.canvas.dispatchEvent(new Event("stageselected"));
         }
     },20);

@@ -49,7 +49,5 @@ INFO.onKeyDown = function(e){
     }
 }
 
-
-// デフォルトではitemCreateがactive
-INFO.ctab = $(".bl_tab_itemCreate");
-INFO.dtab = $(".bl_tab_itemDelete");
+INFO.ctab = $(".bl_mode_create");
+INFO.dtab = $(".bl_mode_delete");

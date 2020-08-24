@@ -105,8 +105,10 @@ INFO.canvas.addEventListener('mouseover', onOver, false);
 INFO.canvas.addEventListener('mouseout', onOut, false);
 INFO.canvas.addEventListener('mousemove',onMove,false);
 document.onkeydown = keyDown;
-var itemOptions = document.querySelector("#item");
+/*
+var itemOptions = document.querySelector(".el_item");
 itemOptions.addEventListener("change",onItemSelected);
+*/
 
 // ゲームロジックで発行されるイベント
 INFO.canvas.addEventListener('update',onUpdate,false);

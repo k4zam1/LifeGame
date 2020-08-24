@@ -2,33 +2,39 @@
 <meta charset="utf-8">
 <title>LIFE GAME</title>
 <link rel="stylesheet" type="text/css" href="style.css"/>
-<link type="text/css" rel="stylesheet"
-  href="http://code.jquery.com/ui/1.10.3/themes/cupertino/jquery-ui.min.css" />
-<script type="text/javascript"
-  src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
-<script type="text/javascript"
-  src="http://code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
 <body onload="main();">
     <div id="app">
         <canvas id="canvas" width="640" height="480"></canvas>
         <canvas id="background" width="640" height="480"></canvas>
         <div id="informationBox">
-            <div id="info"></div>
-            <div id="speed">
-                S <input id="gameSpeedSlider" type="range" name="speed" min="0" max="1000" oninput="INFO.gameSpeed = 1000 - this.value;" > F
-            </div>
-            <select id="item">
+            <!--
+            <div class="ly_info"></div>
+            S <input id="gameSpeedSlider" type="range" min="0" max="1000" oninput="INFO.gameSpeed = 1000 - this.value;" > F
+            <select class="el_item">
                 <option value="none">----</option>
                 <option value="BreederReactor">増殖炉</option>
-                <!-- Item追加時に変更しなければいけないところ -->
             </select>
-            <div class="bl_tab">
-                <div class="bl_tab_itemCreate"></div>
-                <div class="bl_tab_itemDelete"></div>
+            -->  
+            <ul class="tab">
+              <li class="active">information</li>
+              <li>create</li>
+              <li>break</li>
+            </ul>
+
+            <div class="mode">
+              <ul class="show">
+                <div id="el_textBox"></div>
+                <div id="speed">
+                    S <input id="gameSpeedSlider" type="range" name="speed" min="0" max="1000" oninput="INFO.gameSpeed = 1000 - this.value;" > F
+                </div>
+              </ul>
+              <ul class="bl_mode_create"></ul>
+              <ul class="bl_mode_delete"></ul>
             </div>
         </div>
     </div>
-    <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="lib/lib_core.js"></script>
     <script src="js/globals.js"></script>
     <script src="lib/lib_menu.js"></script>  
@@ -38,6 +44,7 @@
     <script src="js/html_generator.js"></script>
     <script src="js/objects_interface.js"></script>
     <script src="js/objects_implement.js"></script>
+    <script src="js/event_tab.js"></script>
     <script src="js/event.js"></script>
     <script src="js/main.js"></script>
 </body>
